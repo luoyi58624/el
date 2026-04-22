@@ -19,49 +19,47 @@ class _ModelValueHook<T> extends Hook<Obs<T>> {
 class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
   late final Obs<T> _obs;
 
-  void _onObsListener() {
-    final m = hook.modelValue;
-    if (m != null && m.value != _obs.value) {
-      m.value = _obs.value;
-    }
+  void _onChanged() {
+    hook.modelValue?.value = _obs.value;
     hook.onChanged?.call(_obs.value);
   }
 
   @override
   void initHook() {
     super.initHook();
-    if (hook.modelValue is ValueNotifier) {
-      final raw = hook.modelValue as ValueNotifier<T>;
-      _obs = Obs<T>(raw.value);
-      raw.addListener(_linkRawObs);
+    final rawObs = hook.modelValue;
+    if (rawObs != null) {
+      _obs = Obs<T>(rawObs.value);
+      rawObs.addListener(_linkRawObs);
     } else {
       _obs = Obs<T>(hook.value as T);
     }
-    _obs.addListener(_onObsListener);
+    _obs.addListener(_onChanged);
   }
 
+  /// 给外部响应式变量添加监听，将更新同步到内部的 [_obs] 变量
   void _linkRawObs() {
-    _obs.rawValue = (hook.modelValue as ValueNotifier).value;
+    assert(hook.modelValue != null, 'ElModelValue Error: _linkRawObs has Exception.');
+    _obs.rawValue = hook.modelValue!.value;
     _obs.notify();
   }
 
   @override
   void didUpdateHook(_ModelValueHook<T> oldHook) {
     super.didUpdateHook(oldHook);
-    if (oldHook.onChanged != hook.onChanged) {
-      _obs.removeListener(_onObsListener);
-      _obs.addListener(_onObsListener);
-    }
+    bool? ignoreValueUpdate; // 如果是 modelValue 发生变更，则不需要更新 value
     if (hook.modelValue != oldHook.modelValue) {
-      if (oldHook.modelValue is ValueNotifier) {
-        (oldHook.modelValue as ValueNotifier).removeListener(_linkRawObs);
+      oldHook.modelValue?.removeListener(_linkRawObs);
+      if (hook.modelValue != null) {
+        ignoreValueUpdate = true;
+        final rawObs = hook.modelValue!;
+        rawObs.addListener(_linkRawObs);
+        safeCallback(() => _obs.value = rawObs.value);
       }
-      if (hook.modelValue is ValueNotifier) {
-        final raw = hook.modelValue as ValueNotifier<T>;
-        raw.addListener(_linkRawObs);
-        safeCallback(() => _obs.value = raw.value);
-      } else {
-        assert(hook.value != null);
+    }
+
+    if (ignoreValueUpdate != true) {
+      if (hook.value != oldHook.value) {
         safeCallback(() => _obs.value = hook.value as T);
       }
     }
@@ -69,10 +67,8 @@ class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
 
   @override
   void dispose() {
-    if (hook.modelValue is ValueNotifier) {
-      (hook.modelValue as ValueNotifier).removeListener(_linkRawObs);
-    }
-    _obs.removeListener(_onObsListener);
+    hook.modelValue?.removeListener(_linkRawObs);
+    _obs.removeListener(_onChanged);
     _obs.dispose();
     super.dispose();
   }
