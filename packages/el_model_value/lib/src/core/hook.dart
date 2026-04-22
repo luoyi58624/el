@@ -1,23 +1,23 @@
 part of 'index.dart';
 
-Obs<T> _useModelValue<T>(T? value, ValueNotifier<T>? modelValue, ValueChanged<T>? onChanged) {
+Obs<D> _useModelValue<D>(D? value, ValueNotifier<D>? modelValue, ValueChanged<D>? onChanged) {
   assert(modelValue != null || value != null, 'ElModelValue Error: if modelValue is null, The value cannot be null.');
-  return use(_ModelValueHook<T>(value: value, modelValue: modelValue, onChanged: onChanged));
+  return use(_ModelValueHook<D>(value: value, modelValue: modelValue, onChanged: onChanged));
 }
 
-class _ModelValueHook<T> extends Hook<Obs<T>> {
+class _ModelValueHook<D> extends Hook<Obs<D>> {
   const _ModelValueHook({this.value, this.modelValue, this.onChanged});
 
-  final T? value;
-  final ValueNotifier<T>? modelValue;
-  final ValueChanged<T>? onChanged;
+  final D? value;
+  final ValueNotifier<D>? modelValue;
+  final ValueChanged<D>? onChanged;
 
   @override
-  _ModelValueHookState<T> createState() => _ModelValueHookState<T>();
+  _ModelValueHookState<D> createState() => _ModelValueHookState<D>();
 }
 
-class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
-  late final Obs<T> _obs;
+class _ModelValueHookState<D> extends HookState<Obs<D>, _ModelValueHook<D>> {
+  late final Obs<D> _obs;
 
   void _onChanged() {
     hook.modelValue?.value = _obs.value;
@@ -29,10 +29,10 @@ class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
     super.initHook();
     final rawObs = hook.modelValue;
     if (rawObs != null) {
-      _obs = Obs<T>(rawObs.value);
+      _obs = Obs<D>(rawObs.value);
       rawObs.addListener(_linkRawObs);
     } else {
-      _obs = Obs<T>(hook.value as T);
+      _obs = Obs<D>(hook.value as D);
     }
     _obs.addListener(_onChanged);
   }
@@ -45,7 +45,7 @@ class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
   }
 
   @override
-  void didUpdateHook(_ModelValueHook<T> oldHook) {
+  void didUpdateHook(_ModelValueHook<D> oldHook) {
     super.didUpdateHook(oldHook);
     bool? ignoreValueUpdate; // 如果是 modelValue 发生变更，则不需要更新 value
     if (hook.modelValue != oldHook.modelValue) {
@@ -60,7 +60,7 @@ class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
 
     if (ignoreValueUpdate != true) {
       if (hook.value != oldHook.value) {
-        safeCallback(() => _obs.value = hook.value as T);
+        safeCallback(() => _obs.value = hook.value as D);
       }
     }
   }
@@ -74,8 +74,8 @@ class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
   }
 
   @override
-  Obs<T> build(BuildContext context) => _obs;
+  Obs<D> build(BuildContext context) => _obs;
 
   @override
-  String get debugLabel => 'useModelValue<$T>';
+  String get debugLabel => 'useModelValue<$D>';
 }
