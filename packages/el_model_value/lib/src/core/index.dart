@@ -11,12 +11,13 @@ abstract class ElModelValue<D> extends HookWidget {
   final ValueNotifier<D>? modelValue;
   final ValueChanged<D>? onChanged;
 
+  /// 保存创建的数据，避免在每个方法进行传参，它所记录的是临时数据，所以无需担心状态问题。
+  ///
+  /// 提示：双向绑定的组件基本都依赖可变值，所以基本用不上 const 修饰。
   @protected
   final Map<String, dynamic> $model = {};
 
-  @protected
-  Widget builder(BuildContext context);
-
+  /// 访问 obs 响应式变量
   @protected
   Obs<D> get $obs => $model['obs'] as Obs<D>;
 
@@ -25,4 +26,7 @@ abstract class ElModelValue<D> extends HookWidget {
     $model['obs'] = _useModelValue<D>(value, modelValue, onChanged);
     return ListenableBuilder(listenable: $model['obs'], builder: (context, child) => builder(context));
   }
+
+  @protected
+  Widget builder(BuildContext context);
 }
