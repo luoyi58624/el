@@ -1,0 +1,17 @@
+name: el_storage
+description: local storage library.
+version: 0.0.7
+repository: https://github.com/luoyi58624/el
+
+environment:
+  sdk: ^3.10.0
+
+resolution: workspace
+
+dependencies:
+  el_dart: ^0.0.12
+  web: ^1.1.1
+  path: ^1.9.1
+
+dev_dependencies:
+  test: any

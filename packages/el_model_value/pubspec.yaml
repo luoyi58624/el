@@ -1,0 +1,19 @@
+name: el_model_value
+description: "element model-value library."
+version: 0.0.1
+repository: https://github.com/luoyi58624/el
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  el_flutter: ^0.0.11
+
+dev_dependencies:
+  flutter_lints: ^6.0.0

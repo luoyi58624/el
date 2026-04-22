@@ -1,0 +1,45 @@
+name: el_flutter
+description: "element flutter ui library"
+version: 0.0.11
+repository: https://github.com/luoyi58624/el
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_web_plugins:
+    sdk: flutter
+  el_dart: ^0.0.12
+  el_http: ^0.0.6
+  el_state: ^0.0.8
+  el_storage: ^0.0.7
+  cupertino_icons: ^1.0.9
+  gap: ^3.0.1
+  super_sliver_list: ^0.4.1
+  extended_tabs: ^5.0.0
+  flutter_hooks: ^0.21.3+1
+  url_launcher: ^6.3.2
+  web: ^1.1.1
+  path: ^1.9.1
+  path_provider: ^2.1.5
+  http: ^1.6.0
+  flutter_cache_manager: ^3.4.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.13.1
+  el_gen: ^0.0.3
+
+flutter:
+  fonts:
+    - family: element
+      fonts:
+        - asset: assets/element.ttf
+

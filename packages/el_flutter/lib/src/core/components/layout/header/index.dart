@@ -1,0 +1,41 @@
+import 'package:flutter/widgets.dart';
+
+class ElHeader extends StatefulWidget {
+  const ElHeader({
+    super.key,
+    this.child,
+    this.height = 56,
+    this.minHeight = 40,
+    this.maxHeight,
+    this.enabledDrag = false,
+    this.bgColor,
+  });
+
+  /// 导航栏子组件，导航栏不包含任何影响你布局的内容
+  final Widget? child;
+
+  /// 导航栏高度
+  final double height;
+
+  /// 导航头最小高度，当使用拖拽控件时，限制其最小宽度
+  final double minHeight;
+
+  /// 导航头最大高度，当使用拖拽控件时，限制其最大宽度
+  final double? maxHeight;
+
+  /// 是否开启拖拽，默认 false
+  final bool enabledDrag;
+
+  /// 导航头背景颜色
+  final Color? bgColor;
+
+  @override
+  State<ElHeader> createState() => _ElHeaderState();
+}
+
+class _ElHeaderState extends State<ElHeader> {
+  @override
+  Widget build(BuildContext context) {
+    return widget.child ?? const SizedBox();
+  }
+}

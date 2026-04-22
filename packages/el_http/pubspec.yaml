@@ -1,0 +1,18 @@
+name: el_http
+description: HTTP library implemented based on Dio.
+version: 0.0.6
+repository: https://github.com/luoyi58624/el
+
+environment:
+  sdk: ^3.10.0
+
+resolution: workspace
+
+dependencies:
+  el_dart: ^0.0.12
+  el_storage: ^0.0.7
+  dio: ^5.9.2
+  dio_smart_retry: ^7.0.1
+
+dev_dependencies:
+  test: any

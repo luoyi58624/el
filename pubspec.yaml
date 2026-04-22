@@ -1,0 +1,37 @@
+name: el
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
+
+workspace:
+  - packages/el_cli
+  - packages/el_dart
+  - packages/el_flutter
+  - packages/el_gen
+  - packages/el_http
+  - packages/el_model_value
+  - packages/el_state
+  - packages/el_storage
+  - packages/el_ui
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  melos: ^7.5.1
+
+dependency_overrides:
+  analyzer: ^9.0.0
+
+melos:
+  ide:
+    intellij:
+      enabled: false
+  command:
+    version:
+      gitTagVersion: false  # 全局关闭tag
+  ignore:
+    - 'docs/**'

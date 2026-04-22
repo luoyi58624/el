@@ -1,0 +1,21 @@
+name: el_state
+description: A simple state manager.
+version: 0.0.8
+repository: https://github.com/luoyi58624/el
+
+resolution: workspace
+
+environment:
+  sdk: ^3.10.0
+  flutter: ">=3.38.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  el_dart: ^0.0.12
+  el_storage: ^0.0.7
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0

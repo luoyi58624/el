@@ -1,0 +1,179 @@
+import 'package:el_flutter/ext.dart';
+import 'package:flutter/material.dart';
+
+import 'package:el_flutter/el_flutter.dart';
+
+part 'theme.dart';
+
+part 'index.g.dart';
+
+/// 分割器交互偏移位置
+enum ElSplitPosition {
+  /// 左偏移，如果是垂直分割布局，则上偏移
+  left,
+
+  /// 居中偏移
+  center,
+
+  /// 右偏移，如果是垂直分割布局，则下偏移
+  right,
+}
+
+/// Element UI 拖拽分割器，该小部件通常用于分割页面布局，它内部会通过 [Overlay] 创建可交互的拖拽器，
+/// 所以当你创建拖拽页面尺寸的小部件时，你需要在外部嵌套一个局部 [Overlay]，否则分割器所在的层级可能很高。
+///
+/// 注意：[ElSplitResizer] 只负责提供拖拽交互，不会对交互数据做任何校验。
+class ElSplitResizer extends StatefulWidget {
+  const ElSplitResizer({super.key, this.onChanged, this.onStart, this.onEnd});
+
+  /// 分割器拖拽偏移
+  final ValueChanged<double>? onChanged;
+
+  /// 分割器开始拖拽
+  final VoidCallback? onStart;
+
+  /// 分割器结束拖拽
+  final VoidCallback? onEnd;
+
+  @override
+  State<ElSplitResizer> createState() => _ElSplitResizerState();
+}
+
+class _ElSplitResizerState extends State<ElSplitResizer> {
+  late ElSplitResizerThemeData themeData;
+  final LayerLink layerLink = LayerLink();
+  late OverlayEntry overlayEntry;
+  final size = Obs(Size.zero);
+  final isActive = Obs(false);
+
+  void insertOverlay() {
+    overlayEntry = OverlayEntry(
+      builder: (context) {
+        bool isVertical = themeData.axis == Axis.vertical;
+        Widget result = ObsBuilder(
+          builder: (context) {
+            Widget result = isVertical
+                ? SizedBox(width: themeData.triggerSize, height: size.value.height)
+                : SizedBox(width: size.value.width, height: themeData.triggerSize);
+            if (isActive.value && themeData.activeColor != null) {
+              result = ColoredBox(color: themeData.activeColor!, child: result);
+            }
+            return result;
+          },
+        );
+
+        late final Offset offset;
+        switch (themeData.position!) {
+          case ElSplitPosition.left:
+            offset = isVertical
+                ? Offset(-themeData.triggerSize! + themeData.size!, 0)
+                : Offset(0, -themeData.triggerSize! + themeData.size!);
+          case ElSplitPosition.center:
+            offset = isVertical
+                ? Offset(-(themeData.triggerSize! - themeData.size!) / 2, 0)
+                : Offset(0, -(themeData.triggerSize! - themeData.size!) / 2);
+          case ElSplitPosition.right:
+            offset = const Offset(0, 0);
+        }
+
+        void onStart() {
+          isActive.value = true;
+          ElCursorUtil.insertGlobalCursor(isVertical ? SystemMouseCursors.resizeColumn : SystemMouseCursors.resizeRow);
+          widget.onStart?.call();
+        }
+
+        void onEnd() {
+          isActive.value = false;
+          ElCursorUtil.removeGlobalCursor();
+          widget.onEnd?.call();
+        }
+
+        return FittedBox(
+          child: CompositedTransformFollower(
+            link: layerLink,
+            offset: offset,
+            child: ElEvent(
+              style: ElEventStyle(
+                behavior: HitTestBehavior.opaque,
+                cursor: isVertical ? SystemMouseCursors.resizeColumn : SystemMouseCursors.resizeRow,
+              ),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onHorizontalDragStart: !isVertical
+                    ? null
+                    : (e) {
+                        onStart();
+                      },
+                onHorizontalDragUpdate: !isVertical
+                    ? null
+                    : (e) {
+                        widget.onChanged?.call(e.delta.dx);
+                      },
+                onHorizontalDragEnd: !isVertical
+                    ? null
+                    : (e) {
+                        onEnd();
+                      },
+                onVerticalDragStart: isVertical
+                    ? null
+                    : (e) {
+                        onStart();
+                      },
+                onVerticalDragUpdate: isVertical
+                    ? null
+                    : (e) {
+                        widget.onChanged?.call(e.delta.dy);
+                      },
+                onVerticalDragEnd: isVertical
+                    ? null
+                    : (e) {
+                        onEnd();
+                      },
+                child: result,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    nextTick(() {
+      Overlay.of(context).insert(overlayEntry);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    insertOverlay();
+  }
+
+  @override
+  void dispose() {
+    overlayEntry.remove();
+    overlayEntry.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    themeData = ElSplitResizerTheme.of(context);
+
+    assert(themeData.triggerSize! >= themeData.size!, 'ElSplitResizer 配置的 triggerSize 必须大于等于 size');
+
+    nextTick(() {
+      if (mounted) {
+        size.value = context.size!;
+      }
+    });
+
+    Widget result = themeData.axis == Axis.vertical
+        ? SizedBox(width: themeData.size, height: double.infinity)
+        : SizedBox(height: themeData.size, width: double.infinity);
+    if (themeData.size! > 0) {
+      result = ColoredBox(color: themeData.color ?? context.elTheme.placeholderTextColor, child: result);
+    }
+
+    return CompositedTransformTarget(link: layerLink, child: result);
+  }
+}

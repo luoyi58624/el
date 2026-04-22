@@ -1,0 +1,125 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'tap.dart';
+
+// **************************************************************************
+// ElModelGenerator
+// **************************************************************************
+
+extension ElTapStyleExt on ElTapStyle {
+  ElTapStyle copyWith({
+    bool? disabled,
+    HitTestBehavior? behavior,
+    void Function(PointerDownEvent)? onPointerDown,
+    void Function(PointerMoveEvent)? onPointerMove,
+    void Function(PointerUpEvent)? onPointerUp,
+    void Function(PointerHoverEvent)? onHover,
+    void Function(PointerPanZoomStartEvent)? onPointerPanZoomStart,
+    void Function(PointerPanZoomUpdateEvent)? onPointerPanZoomUpdate,
+    void Function(PointerPanZoomEndEvent)? onPointerPanZoomEnd,
+    void Function(PointerSignalEvent)? onPointerSignal,
+    void Function(PointerCancelEvent)? onPointerCancel,
+    int? tapUpDelay,
+    void Function(PointerUpEvent)? onTap,
+    void Function(PointerDownEvent)? onTapDown,
+    void Function(PointerUpEvent)? onTapUp,
+    void Function(PointerDownEvent)? onSecondaryTapDown,
+    void Function(PointerUpEvent)? onSecondaryTapUp,
+    void Function(PointerDownEvent)? onTertiaryTapDown,
+    void Function(PointerUpEvent)? onTertiaryTapUp,
+    void Function(PointerDownEvent)? onForwardTapDown,
+    void Function(PointerUpEvent)? onForwardTapUp,
+    void Function(PointerDownEvent)? onBackTapDown,
+    void Function(PointerUpEvent)? onBackTapUp,
+    void Function(PointerEvent)? onCancel,
+    int? doubleTapInterval,
+    void Function(int)? onDoubleTap,
+    void Function(double)? onScaleUpdate,
+    void Function(double)? onRotationUpdate,
+  }) {
+    return ElTapStyle(
+      disabled: disabled ?? this.disabled,
+      behavior: behavior ?? this.behavior,
+      onPointerDown: onPointerDown ?? this.onPointerDown,
+      onPointerMove: onPointerMove ?? this.onPointerMove,
+      onPointerUp: onPointerUp ?? this.onPointerUp,
+      onHover: onHover ?? this.onHover,
+      onPointerPanZoomStart: onPointerPanZoomStart ?? this.onPointerPanZoomStart,
+      onPointerPanZoomUpdate: onPointerPanZoomUpdate ?? this.onPointerPanZoomUpdate,
+      onPointerPanZoomEnd: onPointerPanZoomEnd ?? this.onPointerPanZoomEnd,
+      onPointerSignal: onPointerSignal ?? this.onPointerSignal,
+      onPointerCancel: onPointerCancel ?? this.onPointerCancel,
+      tapUpDelay: tapUpDelay ?? this.tapUpDelay,
+      onTap: onTap ?? this.onTap,
+      onTapDown: onTapDown ?? this.onTapDown,
+      onTapUp: onTapUp ?? this.onTapUp,
+      onSecondaryTapDown: onSecondaryTapDown ?? this.onSecondaryTapDown,
+      onSecondaryTapUp: onSecondaryTapUp ?? this.onSecondaryTapUp,
+      onTertiaryTapDown: onTertiaryTapDown ?? this.onTertiaryTapDown,
+      onTertiaryTapUp: onTertiaryTapUp ?? this.onTertiaryTapUp,
+      onForwardTapDown: onForwardTapDown ?? this.onForwardTapDown,
+      onForwardTapUp: onForwardTapUp ?? this.onForwardTapUp,
+      onBackTapDown: onBackTapDown ?? this.onBackTapDown,
+      onBackTapUp: onBackTapUp ?? this.onBackTapUp,
+      onCancel: onCancel ?? this.onCancel,
+      doubleTapInterval: doubleTapInterval ?? this.doubleTapInterval,
+      onDoubleTap: onDoubleTap ?? this.onDoubleTap,
+      onScaleUpdate: onScaleUpdate ?? this.onScaleUpdate,
+      onRotationUpdate: onRotationUpdate ?? this.onRotationUpdate,
+    );
+  }
+
+  ElTapStyle merge([ElTapStyle? other]) {
+    if (other == null) return this;
+    return copyWith(
+      disabled: other.disabled,
+      behavior: other.behavior,
+      onPointerDown: other.onPointerDown,
+      onPointerMove: other.onPointerMove,
+      onPointerUp: other.onPointerUp,
+      onHover: other.onHover,
+      onPointerPanZoomStart: other.onPointerPanZoomStart,
+      onPointerPanZoomUpdate: other.onPointerPanZoomUpdate,
+      onPointerPanZoomEnd: other.onPointerPanZoomEnd,
+      onPointerSignal: other.onPointerSignal,
+      onPointerCancel: other.onPointerCancel,
+      tapUpDelay: other.tapUpDelay,
+      onTap: other.onTap,
+      onTapDown: other.onTapDown,
+      onTapUp: other.onTapUp,
+      onSecondaryTapDown: other.onSecondaryTapDown,
+      onSecondaryTapUp: other.onSecondaryTapUp,
+      onTertiaryTapDown: other.onTertiaryTapDown,
+      onTertiaryTapUp: other.onTertiaryTapUp,
+      onForwardTapDown: other.onForwardTapDown,
+      onForwardTapUp: other.onForwardTapUp,
+      onBackTapDown: other.onBackTapDown,
+      onBackTapUp: other.onBackTapUp,
+      onCancel: other.onCancel,
+      doubleTapInterval: other.doubleTapInterval,
+      onDoubleTap: other.onDoubleTap,
+      onScaleUpdate: other.onScaleUpdate,
+      onRotationUpdate: other.onRotationUpdate,
+    );
+  }
+
+  List<Object?> get _props => [
+    tapUpDelay,
+    onTap,
+    onTapDown,
+    onTapUp,
+    onSecondaryTapDown,
+    onSecondaryTapUp,
+    onTertiaryTapDown,
+    onTertiaryTapUp,
+    onForwardTapDown,
+    onForwardTapUp,
+    onBackTapDown,
+    onBackTapUp,
+    onCancel,
+    doubleTapInterval,
+    onDoubleTap,
+    onScaleUpdate,
+    onRotationUpdate,
+  ];
+}
