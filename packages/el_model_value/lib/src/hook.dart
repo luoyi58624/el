@@ -1,15 +1,16 @@
 part of 'index.dart';
 
-Obs<T> _useModelValue<T>(T? value, ValueNotifier<T>? modelValue) {
+Obs<T> _useModelValue<T>(T? value, ValueNotifier<T>? modelValue, ValueChanged<T>? onChanged) {
   assert(modelValue != null || value != null, 'ElModelValue Error: if modelValue is null, The value cannot be null.');
-  return use(_ModelValueHook<T>(value: value, modelValue: modelValue));
+  return use(_ModelValueHook<T>(value: value, modelValue: modelValue, onChanged: onChanged));
 }
 
 class _ModelValueHook<T> extends Hook<Obs<T>> {
-  const _ModelValueHook({this.value, this.modelValue});
+  const _ModelValueHook({this.value, this.modelValue, this.onChanged});
 
   final T? value;
   final ValueNotifier<T>? modelValue;
+  final ValueChanged<T>? onChanged;
 
   @override
   _ModelValueHookState<T> createState() => _ModelValueHookState<T>();
@@ -17,6 +18,14 @@ class _ModelValueHook<T> extends Hook<Obs<T>> {
 
 class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
   late final Obs<T> _obs;
+
+  void _onObsListener() {
+    final m = hook.modelValue;
+    if (m != null && m.value != _obs.value) {
+      m.value = _obs.value;
+    }
+    hook.onChanged?.call(_obs.value);
+  }
 
   @override
   void initHook() {
@@ -28,6 +37,7 @@ class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
     } else {
       _obs = Obs<T>(hook.value as T);
     }
+    _obs.addListener(_onObsListener);
   }
 
   void _linkRawObs() {
@@ -38,6 +48,10 @@ class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
   @override
   void didUpdateHook(_ModelValueHook<T> oldHook) {
     super.didUpdateHook(oldHook);
+    if (oldHook.onChanged != hook.onChanged) {
+      _obs.removeListener(_onObsListener);
+      _obs.addListener(_onObsListener);
+    }
     if (hook.modelValue != oldHook.modelValue) {
       if (oldHook.modelValue is ValueNotifier) {
         (oldHook.modelValue as ValueNotifier).removeListener(_linkRawObs);
@@ -58,6 +72,7 @@ class _ModelValueHookState<T> extends HookState<Obs<T>, _ModelValueHook<T>> {
     if (hook.modelValue is ValueNotifier) {
       (hook.modelValue as ValueNotifier).removeListener(_linkRawObs);
     }
+    _obs.removeListener(_onObsListener);
     _obs.dispose();
     super.dispose();
   }
