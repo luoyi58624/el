@@ -1,7 +1,7 @@
 part of 'index.dart';
 
 abstract class ElFormModelValue<D> extends ElModelValue<D> {
-  const ElFormModelValue({super.key, super.value, super.modelValue, super.onChanged, this.prop});
+  ElFormModelValue({super.key, super.value, super.modelValue, super.onChanged, this.prop});
 
   /// 访问 [ElForm] 表单 model 数据 key
   final String? prop;

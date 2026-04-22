@@ -15,20 +15,14 @@ abstract class ElModelValue<D> extends HookWidget {
   final Map<String, dynamic> $model = {};
 
   @protected
-  Widget builder(BuildContext context, Obs<D> obs);
+  Widget builder(BuildContext context);
 
-
-  /// 访问 Map 集合中的 obs 对象
   @protected
-  Obs<D> getObs(Map<String, dynamic> model) {
-    return model['obs'] as Obs<D>;
-  }
+  Obs<D> get $obs => $model['obs'] as Obs<D>;
 
   @override
   Widget build(BuildContext context) {
     $model['obs'] = _useModelValue<D>(value, modelValue, onChanged);
-
-    final obs = getObs(model);
-    return ListenableBuilder(listenable: obs, builder: (context, child) => builder(context, obs));
+    return ListenableBuilder(listenable: $model['obs'], builder: (context, child) => builder(context));
   }
 }

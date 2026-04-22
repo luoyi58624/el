@@ -1,7 +1,7 @@
 part of 'index.dart';
 
 abstract class ElInputModelValue<D> extends ElFormModelValue<D> {
-  const ElInputModelValue({
+  ElInputModelValue({
     super.key,
     super.value,
     super.modelValue,
@@ -28,27 +28,24 @@ abstract class ElInputModelValue<D> extends ElFormModelValue<D> {
   D toModelValue(String text) => text as D;
 
   @protected
-  TextEditingController getTextController(Map<String, dynamic> model) {
-    return model['textController'] as TextEditingController;
-  }
+  TextEditingController get $textController => $model['textController'] as TextEditingController;
 
-  @protected
   @override
-  Map<String, dynamic> registerModel() {
-    final model = super.registerModel();
-    final text = toTextEditing(getObs(model).value);
-    final textController = useTextEditingController(text: text);
-    model['textController'] = textController;
-    model['focusNode'] = useFocusNode();
-    model['scrollController'] = useScrollController();
+  Widget build(BuildContext context) {
+    Widget result = super.build(context);
 
-    return model;
+    final text = toTextEditing($obs.value);
+    $model['textController'] = useTextEditingController(text: text);
+    $model['focusNode'] = useFocusNode();
+    $model['scrollController'] = useScrollController();
+
+    return result;
   }
 
   @override
-  Widget builder(BuildContext context, Obs<D> obs, Map<String, dynamic> model) {
-    final text = toTextEditing(getObs(model).value);
-    final textController = getTextController(model);
+  Widget builder(BuildContext context) {
+    final text = toTextEditing($obs.value);
+    final textController = $textController;
     if (text != textController.text) {
       textController.value = TextEditingValue(text: text);
     }
