@@ -42,7 +42,8 @@ abstract class ElImplicitlyAnimatedWidget extends HookWidget {
     final controller = useAnimationController(duration: globalAnimation.$1);
     final animation = useCurvedAnimation(parent: controller, curve: globalAnimation.$2);
     final tweenMap = useMemoized<Map<dynamic, Tween?>>(() => {});
-    final proxy = useProxyHookWidget(this);
+    final onEndRef = useRef<VoidCallback?>(null);
+    onEndRef.value = onEnd;
 
     useEffect(() {
       forEachTween((String key, dynamic targetValue, Tween<dynamic> tween) {
@@ -54,7 +55,7 @@ abstract class ElImplicitlyAnimatedWidget extends HookWidget {
       });
       controller.addStatusListener((status) {
         if (status.isCompleted) {
-          proxy.widget.onEnd?.call();
+          onEndRef.value?.call();
         }
       });
       return () => tweenMap.clear();
@@ -348,8 +349,8 @@ class _AnimatedRefreshProgressIndicatorState extends AnimatedWidgetBaseState<ElA
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _color = visitor(_color, widget.color, (dynamic value) => ColorTween(begin: value as Color)) as ColorTween?;
     _backgroundColor =
-    visitor(_backgroundColor, widget.backgroundColor, (dynamic value) => ColorTween(begin: value as Color))
-    as ColorTween?;
+        visitor(_backgroundColor, widget.backgroundColor, (dynamic value) => ColorTween(begin: value as Color))
+            as ColorTween?;
   }
 
   @override
