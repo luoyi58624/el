@@ -13,6 +13,7 @@ resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  flutter_hooks: ^0.21.3
 
 dev_dependencies:
   flutter_test:

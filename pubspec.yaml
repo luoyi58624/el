@@ -10,6 +10,7 @@ workspace:
   - packages/el_dart
   - packages/el_flutter
   - packages/el_gen
+  - packages/el_hooks
   - packages/el_http
   - packages/el_model_value
   - packages/el_state
