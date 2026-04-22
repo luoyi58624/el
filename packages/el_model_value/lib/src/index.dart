@@ -1,3 +1,4 @@
+import 'package:el_flutter/el_flutter.dart' show safeCallback;
 import 'package:el_flutter/ext.dart';
 import 'package:flutter/material.dart';
 
@@ -10,15 +11,26 @@ abstract class ElModelValue<T> extends HookWidget {
   final ValueNotifier<T>? modelValue;
   final ValueChanged<T>? onChanged;
 
+  /// 与 [ElModelValueMixin] 的 [modelValue] setter 一致：有外部 [modelValue] 时写其 [ValueNotifier]，否则只写 [obs]。
   @protected
-  Widget builder(BuildContext context, ValueNotifier<T> modelValue);
+  void commitValue(T v, Obs<T> obs) {
+    if (modelValue != null) {
+      modelValue!.value = v;
+    } else {
+      obs.value = v;
+    }
+    onChanged?.call(v);
+  }
+
+  @protected
+  Widget builder(BuildContext context, Obs<T> obs);
 
   @override
   Widget build(BuildContext context) {
-    final modelValue = _useModelValue<T>(value, this.modelValue);
-    return ValueListenableBuilder(
-      valueListenable: modelValue,
-      builder: (context, value, child) => builder(context, modelValue),
+    final obs = _useModelValue<T>(value, modelValue);
+    return ListenableBuilder(
+      listenable: obs,
+      builder: (context, child) => builder(context, obs),
     );
   }
 }
@@ -27,12 +39,11 @@ class MySwitch extends ElModelValue<bool> {
   const MySwitch({super.key, super.value = false, super.modelValue, super.onChanged});
 
   @override
-  Widget builder(BuildContext context, ValueNotifier<bool> modelValue) {
+  Widget builder(BuildContext context, Obs<bool> obs) {
     return Switch(
-      value: modelValue.value,
+      value: obs.value,
       onChanged: (v) {
-        modelValue.value = v;
-        onChanged?.call(v);
+        commitValue(v, obs);
       },
     );
   }
@@ -42,15 +53,14 @@ class MyInput extends ElModelValue<String> {
   const MyInput({super.key, super.value = '', super.modelValue, super.onChanged});
 
   @override
-  Widget builder(BuildContext context, ValueNotifier<String> modelValue) {
+  Widget builder(BuildContext context, Obs<String> obs) {
     return HookBuilder(
       builder: (context) {
         final controller = useTextEditingController();
         return TextField(
           controller: controller,
           onChanged: (v) {
-            modelValue.value = v;
-            onChanged?.call(v);
+            commitValue(v, obs);
           },
         );
       },

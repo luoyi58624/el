@@ -14,6 +14,7 @@ dependencies:
   flutter:
     sdk: flutter
   el_flutter: ^0.0.11
+  el_state: ^0.0.8
 
 dev_dependencies:
   flutter_lints: ^6.0.0
