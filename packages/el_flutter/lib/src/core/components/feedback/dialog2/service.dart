@@ -3,81 +3,69 @@ part of 'index.dart';
 extension ElDialog2Ext on El {
   static final _instance = ElDialog2Service._();
 
-  /// 仅 [show] 与 [persist]；遮罩走 [_backdrop]。
+  /// dialog2 弹窗服务：支持 [show] 与 [showForHandle]。
   ElDialog2Service get dialog2 => _instance;
 }
 
-typedef _D2R = ({Widget body, bool persistent, bool isHidden});
+typedef _Dialog2Record = ({Widget body, bool hideOnClose});
 
 class ElDialog2Service extends ElAnimatedOverlayService {
   ElDialog2Service._();
 
-  /// 仅 dialog2 使用，与基类 [_byHandle] 同步增删（在 [onRemoved] 里清）。
-  final _d2 = <ElOverlayHandle, _D2R>{};
+  /// 仅 dialog2 使用，与基类句柄生命周期保持一致（在 [onRemoved] 中清理）。
+  final _dialogs = <ElOverlayHandle, _Dialog2Record>{};
 
   @override
   int get zIndex => el.config.dialogIndex;
 
-  /// 若 [child] 与已记录 [body] [identical] 则复用；[isHidden] 时 [ElOverlayHandle.show] 再显。否则新插。
-  Future<ElOverlayHandle> show(Widget child) {
-    return tasks.run(() async {
-      for (final e in _d2.entries) {
-        final h = e.key;
-        final o = e.value;
-        if (!identical(o.body, child)) {
-          continue;
-        }
-        if (o.isHidden) {
-          await h.show();
-          _d2[h] = (body: o.body, persistent: o.persistent, isHidden: false);
-        }
-        return h;
-      }
+  /// 创建可复用的 dialog 句柄。默认遮罩点击只隐藏（保留状态）。
+  ElOverlayHandle createHandle(Widget child, {bool hideOnClose = true}) {
+    final handle = createOverlayHandle(
+      (overlayHandle, remove, onRemoveHide, onHideForOverlay, onShowForOverlay) => _ElDialog2Widget(
+        handle: overlayHandle,
+        body: child,
+        removeOverlay: remove,
+        onRegisterRemoveHide: onRemoveHide,
+        onRegisterHideForOverlay: onHideForOverlay,
+        onRegisterShowForOverlay: onShowForOverlay,
+      ),
+    );
+    _dialogs[handle] = (body: child, hideOnClose: hideOnClose);
+    return handle;
+  }
 
-      final h = insertOverlay(
-        (handle, remove, r, hOnly, s) => _ElDialog2Widget(
-          handle: handle,
-          body: child,
-          removeOverlay: remove,
-          onRegisterRemoveHide: r,
-          onRegisterHideForOverlay: hOnly,
-          onRegisterShowForOverlay: s,
-        ),
-      );
-      _d2[h] = (body: child, persistent: false, isHidden: false);
-      return h;
+  /// 显示一个新弹窗，遮罩点击后会销毁该弹窗（remove）。
+  Future<ElOverlayHandle> show(Widget child) async {
+    final handle = createHandle(child, hideOnClose: false);
+    await tasks.run(() => showOverlay(handle));
+    return handle;
+  }
+
+  /// 使用已存在句柄再次显示弹窗，遮罩点击后会隐藏（hide）以保留状态。
+  Future<void> showForHandle(ElOverlayHandle handle) {
+    return tasks.run(() async {
+      final record = _dialogs[handle];
+      if (record == null) return;
+      _dialogs[handle] = (body: record.body, hideOnClose: true);
+      await showOverlay(handle);
     });
   }
 
-  /// 持久化后遮罩 [_backdrop] 只 [hide]；否则 [remove]。
-  Future<void> persist(ElOverlayHandle handle) {
-    return tasks.run(() {
-      final o = _d2[handle];
-      if (o == null) {
-        return;
-      }
-      _d2[handle] = (body: o.body, persistent: true, isHidden: o.isHidden);
-    });
-  }
-
-  Future<void> _backdrop(ElOverlayHandle h) {
+  Future<void> _onBackdropTap(ElOverlayHandle handle) {
     return tasks.run(() async {
-      final o = _d2[h];
-      if (o == null) {
+      final record = _dialogs[handle];
+      if (record == null) return;
+      if (record.hideOnClose) {
+        await hideOverlay(handle);
         return;
       }
-      if (o.persistent) {
-        await h.hide();
-        _d2[h] = (body: o.body, persistent: o.persistent, isHidden: true);
-        return;
-      }
-      await h.remove();
+      await removeOverlay(handle);
     });
   }
 
   @override
   void onRemoved(ElOverlayHandle handle) {
-    _d2.remove(handle);
+    _dialogs.remove(handle);
     super.onRemoved(handle);
   }
 }

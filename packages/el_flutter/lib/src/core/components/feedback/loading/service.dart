@@ -11,8 +11,8 @@ class ElLoadingService extends ElSingleAnimatedOverlayService {
   @override
   int get zIndex => el.config.loadingIndex;
 
-  /// 打开一个 loading，每次打开新的都会关闭当前 loading；全局只保留一个实例。
-  Future<void> open(String text, {ElLoadingCloseModel? closeModel, int? zIndex}) {
+  /// 显示一个 loading，每次打开新的都会关闭当前 loading；全局只保留一个实例。
+  Future<void> show(String text, {ElLoadingCloseModel? closeModel, int? zIndex}) {
     return tasks.run(() async {
       await replace(
         (_, remove, r, h, s) => _ElLoadingWidget(
@@ -27,6 +27,11 @@ class ElLoadingService extends ElSingleAnimatedOverlayService {
         zIndex: zIndex,
       );
     });
+  }
+
+  /// 兼容旧 API，等效于 [show]。
+  Future<void> open(String text, {ElLoadingCloseModel? closeModel, int? zIndex}) {
+    return show(text, closeModel: closeModel, zIndex: zIndex);
   }
 
   /// 关闭当前 loading

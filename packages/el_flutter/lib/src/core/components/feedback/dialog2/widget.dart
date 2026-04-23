@@ -33,7 +33,7 @@ class _ElDialog2WidgetState extends ElAnimatedOverlayWidgetState<_ElDialog2Widge
               Positioned.fill(
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () => unawaited(el.dialog2._backdrop(widget.handle)),
+                  onTap: () => unawaited(el.dialog2._onBackdropTap(widget.handle)),
                   child: ColoredBox(color: Colors.black54),
                 ),
               ),

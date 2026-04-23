@@ -33,7 +33,7 @@ class ElToastService extends ElSingleAnimatedOverlayService {
     });
   }
 
-  /// 默认 toast 显示在中间；  
+  /// 默认 toast 显示在中间；
   /// 当 type 不为 null 时，使用旧版主题 toast 的底部样式。
   Future<void> show(dynamic content, {ElThemeType? type, bool? tapClose, int? zIndex}) {
     return builder(
@@ -58,9 +58,6 @@ class ElToastService extends ElSingleAnimatedOverlayService {
 
   Future<void> error(dynamic content, {bool? tapClose, int? zIndex}) =>
       show(content, type: .error, tapClose: tapClose, zIndex: zIndex);
-
-  /// 关闭当前 toast
-  Future<void> close() => tasks.run(() => removeOverlay());
 }
 
 class _ElToastWidget extends ElAnimatedOverlayWidget {
