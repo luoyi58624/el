@@ -177,6 +177,14 @@ class ElInput extends ElInputModelValue<String> {
   final TextMagnifierConfiguration? magnifierConfiguration;
   final List<Locale>? hintLocales;
 
+  static const String _obscureOverrideKey = 'el_input._obscureOverride';
+
+  @override
+  Widget build(BuildContext context) {
+    $model[_obscureOverrideKey] = useState<bool?>(null);
+    return super.build(context);
+  }
+
   @override
   Widget obsBuilder(BuildContext context) {
     final text = toTextEditing($obs.value);
@@ -189,7 +197,7 @@ class ElInput extends ElInputModelValue<String> {
 
   @override
   Widget buildInput(BuildContext context) {
-    final obscureOverride = useState<bool?>(null);
+    final obscureOverride = $model[_obscureOverrideKey] as ValueNotifier<bool?>;
     final effectiveObscure = obscureOverride.value ?? obscureText;
 
     InputDecoration? effectiveDecoration = decoration;
