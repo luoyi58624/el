@@ -27,6 +27,16 @@ class ElFormController extends ElHookState {
     for (final prop in props) {
       String? msg;
 
+      if (rules != null && rules!.containsKey(prop)) {
+        List<ElFormRule> rules = this.rules![prop]!;
+        for (final rule in rules) {
+          if (rule.validator(rule, formData[prop]) != true) {
+            msg = rule.message;
+            break;
+          }
+        }
+      }
+
       if (msg == null) {
         errorMessages.remove(prop);
       } else {
