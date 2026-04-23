@@ -293,7 +293,6 @@ abstract class ElAnimatedOverlayWidget extends StatefulWidget {
 
 abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> extends State<T>
     with SingleTickerProviderStateMixin {
-  bool _seenVisibleAfterInsert = false;
   Future<void> _transitionTask = Future.value();
 
   @protected
@@ -327,10 +326,10 @@ abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> e
   @protected
   Widget overlayPointerFilter(Widget child) {
     return ListenableBuilder(
-      listenable: controller,
+      listenable: Listenable.merge([controller, handle]),
       builder: (context, _) {
         return IgnorePointer(
-          ignoring: _seenVisibleAfterInsert && controller.status == AnimationStatus.dismissed,
+          ignoring: !handle.isVisible,
           child: child,
         );
       },
@@ -355,7 +354,6 @@ abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> e
       if (controller.isCompleted) return;
       await show();
       if (!mounted || !handle.isVisible) return;
-      _seenVisibleAfterInsert = true;
       onShown();
       return;
     }
