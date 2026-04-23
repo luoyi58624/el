@@ -293,7 +293,7 @@ abstract class ElAnimatedOverlayWidget extends StatefulWidget {
 
 abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> extends State<T>
     with SingleTickerProviderStateMixin {
-  Future<void> _transitionTask = Future.value();
+  int _syncVersion = 0;
 
   @protected
   late final AnimationController controller = AnimationController(
@@ -345,27 +345,29 @@ abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> e
   }
 
   void _scheduleSync() {
-    _transitionTask = _transitionTask.then((_) => _syncToHandleState());
+    final version = ++_syncVersion;
+    unawaited(_syncToHandleState(version));
   }
 
-  Future<void> _syncToHandleState() async {
+  Future<void> _syncToHandleState(int version) async {
     if (!mounted || !handle.isActive) return;
     if (handle.isVisible) {
       if (controller.isCompleted) return;
       await show();
-      if (!mounted || !handle.isVisible) return;
+      if (!mounted || version != _syncVersion || !handle.isVisible) return;
       onShown();
       return;
     }
     if (handle.isHidden) {
       if (controller.isDismissed) return;
       await hide();
+      if (!mounted || version != _syncVersion) return;
       return;
     }
     if (!controller.isDismissed) {
       await hide();
     }
-    if (!mounted || !handle.isRemoving) return;
+    if (!mounted || version != _syncVersion || !handle.isRemoving) return;
     handle._owner._completeRemoval(handle);
   }
 
