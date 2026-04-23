@@ -143,7 +143,7 @@ class _TestFormBoolField extends ElFormModelValue<bool> {
   _TestFormBoolField({super.value = false, super.prop});
 
   @override
-  Widget builder(BuildContext context) {
+  Widget obsBuilder(BuildContext context) {
     return Switch(
       value: $obs.value,
       onChanged: (v) {

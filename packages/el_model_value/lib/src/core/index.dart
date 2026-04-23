@@ -23,10 +23,12 @@ abstract class ElModelValue<D> extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 创建双向绑定钩子，根据 value、modelValue 返回全新的 Obs 响应式变量
     $model['obs'] = _useModelValue<D>(value, modelValue, onChanged);
-    return ListenableBuilder(listenable: $model['obs'], builder: (context, child) => builder(context));
+    return ListenableBuilder(listenable: $model['obs'], builder: (context, child) => obsBuilder(context));
   }
 
+  /// 构建响应式组件
   @protected
-  Widget builder(BuildContext context);
+  Widget obsBuilder(BuildContext context);
 }

@@ -30,6 +30,12 @@ abstract class ElInputModelValue<D> extends ElFormModelValue<D> {
   @protected
   TextEditingController get $textController => $model['textController'] as TextEditingController;
 
+  @protected
+  FocusNode get $focusNode => $model['focusNode'] as FocusNode;
+
+  @protected
+  ScrollController get $scrollController => $model['scrollController'] as ScrollController;
+
   @override
   Widget build(BuildContext context) {
     Widget result = super.build(context);
@@ -43,7 +49,7 @@ abstract class ElInputModelValue<D> extends ElFormModelValue<D> {
   }
 
   @override
-  Widget builder(BuildContext context) {
+  Widget obsBuilder(BuildContext context) {
     final text = toTextEditing($obs.value);
     final textController = $textController;
     if (text != textController.text) {
