@@ -1,17 +1,10 @@
 // ElForm、ElFormController、ElFormModelValue（prop / 校验错误展示）行为。
 
-import 'package:el_flutter/el_flutter.dart' show ElFormRule, ElFormRuleTrigger;
 import 'package:el_model_value/el_model_value.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:provider/provider.dart';
 
 void main() {
-  // ElForm 使用 [Provider] 传 [Listenable] 子类，测试环境会触发 assert；与业务里若关闭检查一致。
-  setUpAll(() {
-    Provider.debugCheckInvalidValueType = null;
-  });
-
   group('ElForm / ElFormController', () {
     testWidgets('ElForm 向子树提供 ElFormController（maybeOf）', (tester) async {
       final controller = ElFormController(initialValue: <String, dynamic>{});

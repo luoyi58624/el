@@ -1,7 +1,11 @@
 part of 'index.dart';
 
 class ElFormController extends ElHookState {
-  ElFormController({required this.initialValue, this.rules, this.errorTextStyle}) {
+  ElFormController({
+    required this.initialValue,
+    this.rules,
+    this.errorTextStyle = const TextStyle(fontSize: 12, color: Colors.red),
+  }) {
     formData = MapObs<String, dynamic>(initialValue);
   }
 
@@ -26,6 +30,16 @@ class ElFormController extends ElHookState {
   bool validate() {
     for (final prop in props) {
       String? msg;
+
+      if (rules != null && rules!.containsKey(prop)) {
+        List<ElFormRule> rules = this.rules![prop]!;
+        for (final rule in rules) {
+          if (rule.validator(rule, formData[prop]) != true) {
+            msg = rule.message;
+            break;
+          }
+        }
+      }
 
       if (msg == null) {
         errorMessages.remove(prop);

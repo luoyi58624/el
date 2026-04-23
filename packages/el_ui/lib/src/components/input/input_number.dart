@@ -1,10 +1,15 @@
 part of 'index.dart';
 
 class ElInputNumber extends ElInputModelValue<num?> {
-  const ElInputNumber(
-    super.modelValue, {
+  ElInputNumber({
     super.key,
+    super.value,
+    super.modelValue,
     super.onChanged,
+    super.prop,
+    super.controller,
+    super.focusNode,
+    super.scrollController,
     this.width = 80.0,
     this.min,
     this.max,
@@ -32,14 +37,9 @@ class ElInputNumber extends ElInputModelValue<num?> {
   final bool required;
 
   @override
-  State<ElInputNumber> createState() => _ElInputNumberState();
-}
-
-class _ElInputNumberState extends ElInputModelValueState<ElInputNumber, num?> {
-  @override
-  String toTextEditing(num? modelValue) {
-    if (modelValue == null) return '';
-    return modelValue.toString();
+  String toTextEditing(num? value) {
+    if (value == null) return '';
+    return value.toString();
   }
 
   @override
@@ -49,11 +49,22 @@ class _ElInputNumberState extends ElInputModelValueState<ElInputNumber, num?> {
   }
 
   @override
+  Widget obsBuilder(BuildContext context) {
+    final text = toTextEditing($obs.value);
+    final tc = controller ?? $textController;
+    if (text != tc.text) {
+      tc.value = TextEditingValue(text: text);
+    }
+    return buildInput(context);
+  }
+
+  @override
   Widget buildInput(BuildContext context) {
     return TextField(
-      controller: controller,
-      focusNode: focusNode,
-      scrollController: scrollController,
+      controller: controller ?? $textController,
+      onChanged: (s) => $obs.value = toModelValue(s),
+      focusNode: focusNode ?? $focusNode,
+      scrollController: scrollController ?? $scrollController,
       decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide.none)),
       textAlign: TextAlign.center,
       keyboardType: TextInputType.number,
@@ -65,21 +76,19 @@ class _ElInputNumberState extends ElInputModelValueState<ElInputNumber, num?> {
   Widget build(BuildContext context) {
     Widget result = super.build(context);
 
-    if (widget.width != null) {
-      result = SizedBox(width: widget.width, child: result);
+    if (width != null) {
+      result = SizedBox(width: width, child: result);
     } else {
       result = Expanded(child: result);
     }
 
-    result = Row(
+    return Row(
       children: [
         ElButton(onPressed: () {}, child: Icons.remove),
         result,
         ElButton(onPressed: () {}, child: Icons.add),
       ],
     );
-
-    return result;
   }
 }
 
@@ -88,7 +97,7 @@ class ElNumberFormatter extends TextInputFormatter {
   const ElNumberFormatter();
 
   @override
-  TextEditingValue formatEditUpdate(oldValue, newValue) {
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
     String newText = newValue.text;
 
     if (newText.isEmpty) return newValue;
@@ -100,7 +109,7 @@ class ElNumberFormatter extends TextInputFormatter {
 
     return newValue.copyWith(
       text: newText,
-      selection: newText.length < newValue.text.length ? TextSelection.collapsed(offset: 0) : newValue.selection,
+      selection: newText.length < newValue.text.length ? const TextSelection.collapsed(offset: 0) : newValue.selection,
     );
   }
 }

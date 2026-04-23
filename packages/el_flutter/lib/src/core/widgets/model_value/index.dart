@@ -2,12 +2,6 @@ import 'package:el_flutter/ext.dart';
 import 'package:flutter/material.dart';
 import 'package:el_flutter/el_flutter.dart';
 
-part 'form.dart';
-
-part 'input.dart';
-
-part 'input_num.dart';
-
 part 'stateless.dart';
 
 // ignore_for_file: invalid_use_of_visible_for_testing_member

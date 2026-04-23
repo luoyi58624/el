@@ -1,108 +1,163 @@
+import 'package:el_model_value/el_model_value.dart';
+import 'package:el_ui/el_ui.dart' hide ElModelValue, ElModelValueMixin, ElStatelessModelValue;
 import 'package:flutter/material.dart';
-import 'package:el_ui/el_ui.dart';
+import 'package:flutter/services.dart';
 
-class ElSelect<T> extends DropdownMenu<T> implements ElInputModelValue<T> {
-  ElSelect(
-    this.modelValue, {
+class ElSelect<T> extends ElInputModelValue<T> {
+  ElSelect({
     super.key,
-    this.prop,
-    this.onChanged,
-    required this.children,
-    super.enabled,
-    super.width,
-    super.menuHeight,
-    super.leadingIcon,
-    super.trailingIcon,
-    super.showTrailingIcon,
-    super.label,
-    super.hintText,
-    super.helperText,
-    super.errorText,
-    super.selectedTrailingIcon,
-    super.enableFilter,
-    super.enableSearch,
-    super.keyboardType,
-    super.textStyle,
-    super.textAlign,
-    super.inputDecorationTheme,
-    super.menuStyle,
+    super.value,
+    super.modelValue,
+    super.prop,
+    super.onChanged,
     super.controller,
-    super.initialSelection,
-    super.onSelected,
     super.focusNode,
-    super.requestFocusOnTap,
-    super.expandedInsets,
-    super.filterCallback,
-    super.searchCallback,
-    super.alignmentOffset,
-    super.inputFormatters,
-    super.closeBehavior,
-    super.maxLines,
-    super.textInputAction,
-    super.restorationId,
-  }) : super(
-         dropdownMenuEntries: children
-             .map((e) => DropdownMenuEntry<T>(label: e.label!, value: (e.value ?? e.label) as T))
-             .toList(),
-       );
-
-  @override
-  final dynamic modelValue;
-
-  @override
-  final String? prop;
-
-  @override
-  final ValueChanged<T>? onChanged;
-
-  @override
-  ScrollController? get scrollController => null;
+    super.scrollController,
+    required this.children,
+    this.enabled = true,
+    this.width,
+    this.menuHeight,
+    this.leadingIcon,
+    this.trailingIcon,
+    this.showTrailingIcon = true,
+    this.label,
+    this.hintText,
+    this.helperText,
+    this.errorText,
+    this.selectedTrailingIcon,
+    this.enableFilter = false,
+    this.enableSearch = false,
+    this.keyboardType,
+    this.textStyle,
+    this.textAlign,
+    this.inputDecorationTheme,
+    this.menuStyle,
+    this.initialSelection,
+    this.onSelected,
+    this.requestFocusOnTap = true,
+    this.expandedInsets,
+    this.filterCallback,
+    this.searchCallback,
+    this.alignmentOffset,
+    this.inputFormatters,
+    this.closeBehavior = DropdownMenuCloseBehavior.all,
+    this.maxLines,
+    this.textInputAction,
+    this.restorationId,
+  });
 
   final List<ElLabelModel<T>> children;
 
-  @override
-  State<ElSelect<T>> createState() => _ElSelectState<T>();
-}
+  final bool enabled;
+  final double? width;
+  final double? menuHeight;
+  final Widget? leadingIcon;
+  final Widget? trailingIcon;
+  final bool showTrailingIcon;
+  final Widget? label;
+  final String? hintText;
+  final String? helperText;
+  final String? errorText;
+  final Widget? selectedTrailingIcon;
+  final bool enableFilter;
+  final bool enableSearch;
+  final TextInputType? keyboardType;
+  final TextStyle? textStyle;
+  final TextAlign? textAlign;
+  final InputDecorationTheme? inputDecorationTheme;
+  final MenuStyle? menuStyle;
+  final T? initialSelection;
+  final ValueChanged<T?>? onSelected;
+  final bool requestFocusOnTap;
+  final EdgeInsets? expandedInsets;
+  final FilterCallback<T>? filterCallback;
+  final SearchCallback<T>? searchCallback;
+  final Offset? alignmentOffset;
+  final List<TextInputFormatter>? inputFormatters;
+  final DropdownMenuCloseBehavior closeBehavior;
+  final int? maxLines;
+  final TextInputAction? textInputAction;
+  final String? restorationId;
 
-class _ElSelectState<T> extends ElInputModelValueState<ElSelect<T>, T> {
+  List<DropdownMenuEntry<T>> get _entries => children
+      .map((e) => DropdownMenuEntry<T>(label: e.label!, value: (e.value ?? e.label) as T))
+      .toList();
+
+  @override
+  String toTextEditing(T value) {
+    for (final e in children) {
+      final entryValue = (e.value ?? e.label) as T;
+      if (entryValue == value) {
+        return e.label!;
+      }
+    }
+    return value.toString();
+  }
+
+  @override
+  T toModelValue(String text) {
+    for (final e in children) {
+      if (e.label == text) {
+        return (e.value ?? e.label) as T;
+      }
+    }
+    return text as T;
+  }
+
+  @override
+  Widget obsBuilder(BuildContext context) {
+    final text = toTextEditing($obs.value);
+    final tc = controller ?? $textController;
+    if (text != tc.text) {
+      tc.value = TextEditingValue(text: text);
+    }
+    return buildInput(context);
+  }
+
   @override
   Widget buildInput(BuildContext context) {
-    return DropdownMenu(
-      controller: controller,
+    final textController = controller ?? $textController;
+    final effectiveFocusNode = focusNode ?? $focusNode;
+
+    return DropdownMenu<T>(
+      controller: textController,
       onSelected: (v) {
-        modelValue = v as T;
+        if (v != null) {
+          $obs.value = v;
+        }
+        onSelected?.call(v);
       },
-      dropdownMenuEntries: widget.dropdownMenuEntries,
-      enabled: widget.enabled,
-      width: widget.width,
-      menuHeight: widget.menuHeight,
-      leadingIcon: widget.leadingIcon,
-      trailingIcon: widget.trailingIcon,
-      showTrailingIcon: widget.showTrailingIcon,
-      label: widget.label,
-      hintText: widget.hintText,
-      helperText: widget.helperText,
-      errorText: widget.errorText,
-      selectedTrailingIcon: widget.selectedTrailingIcon,
-      enableFilter: widget.enableFilter,
-      enableSearch: widget.enableSearch,
-      keyboardType: widget.keyboardType,
-      textStyle: widget.textStyle,
-      textAlign: widget.textAlign,
-      inputDecorationTheme: widget.inputDecorationTheme,
-      menuStyle: widget.menuStyle,
-      initialSelection: widget.initialSelection,
-      focusNode: widget.focusNode,
-      requestFocusOnTap: widget.requestFocusOnTap,
-      expandedInsets: widget.expandedInsets,
-      filterCallback: widget.filterCallback,
-      searchCallback: widget.searchCallback,
-      alignmentOffset: widget.alignmentOffset,
-      inputFormatters: widget.inputFormatters,
-      closeBehavior: widget.closeBehavior,
-      maxLines: widget.maxLines,
-      textInputAction: widget.textInputAction,
-      restorationId: widget.restorationId,
+      dropdownMenuEntries: _entries,
+      enabled: enabled,
+      width: width,
+      menuHeight: menuHeight,
+      leadingIcon: leadingIcon,
+      trailingIcon: trailingIcon,
+      showTrailingIcon: showTrailingIcon,
+      label: label,
+      hintText: hintText,
+      helperText: helperText,
+      errorText: errorText,
+      selectedTrailingIcon: selectedTrailingIcon,
+      enableFilter: enableFilter,
+      enableSearch: enableSearch,
+      keyboardType: keyboardType,
+      textStyle: textStyle,
+      textAlign: textAlign ?? TextAlign.start,
+      inputDecorationTheme: inputDecorationTheme,
+      menuStyle: menuStyle,
+      initialSelection: initialSelection,
+      focusNode: effectiveFocusNode,
+      requestFocusOnTap: requestFocusOnTap,
+      expandedInsets: expandedInsets,
+      filterCallback: filterCallback,
+      searchCallback: searchCallback,
+      alignmentOffset: alignmentOffset,
+      inputFormatters: inputFormatters,
+      closeBehavior: closeBehavior,
+      maxLines: maxLines,
+      textInputAction: textInputAction,
+      restorationId: restorationId,
     );
   }
 }

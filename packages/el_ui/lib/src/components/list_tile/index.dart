@@ -42,7 +42,7 @@ class ElListTile extends StatelessWidget {
       trailing ??= const Icon(Icons.keyboard_arrow_right);
     }
     if (toggle != null) {
-      trailing ??= ElSwitch(toggle);
+      trailing ??= ElSwitch(modelValue: toggle);
     }
 
     dense ??= subtitle == null ? false : true;

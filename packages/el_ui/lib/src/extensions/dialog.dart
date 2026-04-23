@@ -118,7 +118,7 @@ class ElDialogService extends e.ElDialogService {
         crossAxisAlignment: .start,
         children: [
           H3(title),
-          Padding(padding: const .symmetric(vertical: 16), child: ElInput(inputValue, autofocus: true)),
+          Padding(padding: const .symmetric(vertical: 16), child: ElInput(modelValue: inputValue, autofocus: true)),
           Row(
             children: [
               const Spacer(),

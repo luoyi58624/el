@@ -1,4 +1,8 @@
-part of 'index.dart';
+import 'package:el_flutter/ext.dart';
+import 'package:el_model_value/el_model_value.dart';
+import 'package:flutter/widgets.dart';
+
+part 'input_number.dart';
 
 abstract class ElInputModelValue<D> extends ElFormModelValue<D> {
   ElInputModelValue({
@@ -58,6 +62,10 @@ abstract class ElInputModelValue<D> extends ElFormModelValue<D> {
     return buildInput(context);
   }
 
-  /// 构建输入框小部件
+  /// 构建输入框小部件。
+  ///
+  /// 在 [ListenableBuilder] 的 builder 中调用，不属于 [HookWidget.build] 的 Hook 上下文，
+  /// 因此不能在此方法内调用 [useState]、[useMemoized] 等。若子类需要 Hook，
+  /// 请重写 [build]（在调用 `super.build` 之前）将结果存入 [$model] 供此处读取。
   Widget buildInput(BuildContext context);
 }

@@ -1,9 +1,10 @@
 part of 'index.dart';
 
 abstract class ElInputNumModelValue extends ElInputModelValue<num?> {
-  const ElInputNumModelValue(
-    super.modelValue, {
+  ElInputNumModelValue({
     super.key,
+    super.value,
+    super.modelValue,
     super.onChanged,
     super.controller,
     super.focusNode,
@@ -11,12 +12,7 @@ abstract class ElInputNumModelValue extends ElInputModelValue<num?> {
   });
 
   @override
-  State<ElInputNumModelValue> createState();
-}
-
-abstract class ElInputNumModelValueState<T extends ElInputNumModelValue> extends ElInputModelValueState<T, num?> {
-  @override
-  String toTextEditing(num? modelValue) {
+  String toTextEditing(num? value) {
     if (modelValue == null) return '';
     return modelValue.toString();
   }

@@ -31,7 +31,6 @@ export 'src/core/components/feedback/modal/index.dart';
 export 'src/core/components/form/autocomplete.dart';
 export 'src/core/components/form/cascader.dart';
 export 'src/core/components/form/editor.dart';
-export 'src/core/components/form/form/index.dart';
 
 export 'src/core/components/layout/grid/index.dart';
 export 'src/core/components/layout/virtual_scroll/index.dart';

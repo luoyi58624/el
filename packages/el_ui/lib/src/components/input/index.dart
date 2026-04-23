@@ -1,4 +1,9 @@
-import 'package:el_ui/el_ui.dart';
+import 'package:el_flutter/ext.dart';
+import 'package:el_model_value/el_model_value.dart';
+import 'package:el_ui/el_ui.dart' hide ElModelValue, ElModelValueMixin, ElStatelessModelValue;
+import 'dart:ui' show BoxHeightStyle, BoxWidthStyle;
+
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -10,257 +15,310 @@ part 'index.g.dart';
 
 // ignore_for_file: deprecated_member_use
 
-/// Element 响应式输入框，它继承官方提供的 [TextField]，所有行为都与 [TextField] 无异。
-/// 你无需声明 [TextEditingController] 控制器，也无需监听 [onChanged] 手动更新内容：
-/// * 当输入框内部发生变化时，会自动同步 input 变量；
-/// * 当更新 input 变量时，也会自动同步输入框的内部状态；
+/// Element 响应式输入框，行为与 [TextField] 对齐。
 ///
-/// 例如：
+/// 使用命名参数 [value] / [modelValue] 绑定；可选 [controller] / [focusNode] 覆盖内部 hook 实例。
+///
 /// ```dart
-/// class _Example extends HookWidget {
-///   const _Example();
-///
-///   @override
-///   Widget build(BuildContext context) {
-///     final input = useState('');
-///     return ElInput(input);
-///   }
-/// }
+/// final input = useState('');
+/// return ElInput(modelValue: input);
 /// ```
 ///
-/// 如果你想集成其他设计语言的输入框，可以选择继承 [ElInputModelValue] 基础小部件。
-class ElInput extends TextField implements ElInputModelValue<String> {
-  const ElInput(
-    this.modelValue, {
+/// 自定义输入外观可继承 [ElInputModelValue]。
+class ElInput extends ElInputModelValue<String> {
+  ElInput({
     super.key,
-    this.prop,
+    super.value,
+    super.modelValue,
+    super.prop,
+    super.onChanged,
+    super.controller,
+    super.focusNode,
+    super.scrollController,
     this.cleanIcon = const Icon(Icons.clear, size: 18),
     this.clearable = false,
     this.showPasswordIcon = false,
     this.onClean,
-    super.controller,
-    super.focusNode,
-    super.undoController,
-    super.decoration,
-    super.keyboardType,
-    super.textInputAction,
-    super.textCapitalization,
-    super.style,
-    super.strutStyle,
-    super.textAlign,
-    super.textAlignVertical,
-    super.textDirection,
-    super.readOnly,
-    super.toolbarOptions,
-    super.showCursor,
-    super.autofocus,
-    super.statesController,
-    super.obscuringCharacter,
-    super.obscureText,
-    super.autocorrect,
-    super.smartDashesType,
-    super.smartQuotesType,
-    super.enableSuggestions,
-    super.maxLines,
-    super.minLines,
-    super.expands,
-    super.maxLength,
-    super.maxLengthEnforcement,
-    super.onChanged,
-    super.onEditingComplete,
-    super.onSubmitted,
-    super.onAppPrivateCommand,
-    super.inputFormatters,
-    super.enabled,
-    super.ignorePointers,
-    super.cursorWidth,
-    super.cursorHeight,
-    super.cursorRadius,
-    super.cursorOpacityAnimates,
-    super.cursorColor,
-    super.cursorErrorColor,
-    super.selectionHeightStyle,
-    super.selectionWidthStyle,
-    super.keyboardAppearance,
-    super.scrollPadding,
-    super.dragStartBehavior,
-    super.enableInteractiveSelection,
-    super.selectAllOnFocus,
-    super.selectionControls,
-    super.onTap,
-    super.onTapAlwaysCalled,
-    super.onTapOutside,
-    super.onTapUpOutside,
-    super.mouseCursor,
-    super.buildCounter,
-    super.scrollController,
-    super.scrollPhysics,
-    super.autofillHints,
-    super.contentInsertionConfiguration,
-    super.clipBehavior,
-    super.restorationId,
-    super.scribbleEnabled,
-    super.stylusHandwritingEnabled,
-    super.enableIMEPersonalizedLearning,
-    super.contextMenuBuilder,
-    super.canRequestFocus,
-    super.spellCheckConfiguration,
-    super.magnifierConfiguration,
-    super.hintLocales,
+    this.undoController,
+    this.decoration,
+    this.keyboardType,
+    this.textInputAction,
+    this.textCapitalization = TextCapitalization.none,
+    this.style,
+    this.strutStyle,
+    this.textAlign = TextAlign.start,
+    this.textAlignVertical,
+    this.textDirection,
+    this.readOnly = false,
+    this.toolbarOptions,
+    this.showCursor = true,
+    this.autofocus = false,
+    this.statesController,
+    this.obscuringCharacter = '•',
+    this.obscureText = false,
+    this.autocorrect = true,
+    this.smartDashesType,
+    this.smartQuotesType,
+    this.enableSuggestions = true,
+    this.maxLines = 1,
+    this.minLines,
+    this.expands = false,
+    this.maxLength,
+    this.maxLengthEnforcement,
+    this.onEditingComplete,
+    this.onSubmitted,
+    this.onAppPrivateCommand,
+    this.inputFormatters,
+    this.enabled = true,
+    this.ignorePointers = false,
+    this.cursorWidth = 2.0,
+    this.cursorHeight,
+    this.cursorRadius,
+    this.cursorOpacityAnimates,
+    this.cursorColor,
+    this.cursorErrorColor,
+    this.selectionHeightStyle,
+    this.selectionWidthStyle,
+    this.keyboardAppearance,
+    this.scrollPadding = const EdgeInsets.all(20.0),
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.enableInteractiveSelection = true,
+    this.selectAllOnFocus = false,
+    this.selectionControls,
+    this.onTap,
+    this.onTapAlwaysCalled = false,
+    this.onTapOutside,
+    this.onTapUpOutside,
+    this.mouseCursor,
+    this.buildCounter,
+    this.scrollPhysics,
+    this.autofillHints,
+    this.contentInsertionConfiguration,
+    this.clipBehavior = Clip.hardEdge,
+    this.restorationId,
+    this.scribbleEnabled = true,
+    this.stylusHandwritingEnabled = true,
+    this.enableIMEPersonalizedLearning = true,
+    this.contextMenuBuilder,
+    this.canRequestFocus = true,
+    this.spellCheckConfiguration,
+    this.magnifierConfiguration,
+    this.hintLocales,
   });
 
-  @override
-  final dynamic modelValue;
-
-  @override
-  final String? prop;
-
-  /// 自定义清除图标
   final Widget cleanIcon;
-
-  /// 显示清除图标
   final bool clearable;
-
-  /// 构建显示、隐藏密码图标，要默认隐藏请设置 [obscureText] 为 true
   final bool showPasswordIcon;
-
-  /// 点击清除回调
   final GestureTapCallback? onClean;
 
+  final UndoHistoryController? undoController;
+  final InputDecoration? decoration;
+  final TextInputType? keyboardType;
+  final TextInputAction? textInputAction;
+  final TextCapitalization textCapitalization;
+  final TextStyle? style;
+  final StrutStyle? strutStyle;
+  final TextAlign textAlign;
+  final TextAlignVertical? textAlignVertical;
+  final TextDirection? textDirection;
+  final bool readOnly;
+  final ToolbarOptions? toolbarOptions;
+  final bool showCursor;
+  final bool autofocus;
+  final WidgetStatesController? statesController;
+  final String obscuringCharacter;
+  final bool obscureText;
+  final bool autocorrect;
+  final SmartDashesType? smartDashesType;
+  final SmartQuotesType? smartQuotesType;
+  final bool enableSuggestions;
+  final int? maxLines;
+  final int? minLines;
+  final bool expands;
+  final int? maxLength;
+  final MaxLengthEnforcement? maxLengthEnforcement;
+  final VoidCallback? onEditingComplete;
+  final ValueChanged<String>? onSubmitted;
+  final AppPrivateCommandCallback? onAppPrivateCommand;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool enabled;
+  final bool ignorePointers;
+  final double cursorWidth;
+  final double? cursorHeight;
+  final Radius? cursorRadius;
+  final bool? cursorOpacityAnimates;
+  final Color? cursorColor;
+  final Color? cursorErrorColor;
+  final BoxHeightStyle? selectionHeightStyle;
+  final BoxWidthStyle? selectionWidthStyle;
+  final Brightness? keyboardAppearance;
+  final EdgeInsets scrollPadding;
+  final DragStartBehavior dragStartBehavior;
+  final bool enableInteractiveSelection;
+  final bool selectAllOnFocus;
+  final TextSelectionControls? selectionControls;
+  final GestureTapCallback? onTap;
+  final bool onTapAlwaysCalled;
+  final TapRegionCallback? onTapOutside;
+  final TapRegionUpCallback? onTapUpOutside;
+  final MouseCursor? mouseCursor;
+  final InputCounterWidgetBuilder? buildCounter;
+  final ScrollPhysics? scrollPhysics;
+  final Iterable<String>? autofillHints;
+  final ContentInsertionConfiguration? contentInsertionConfiguration;
+  final Clip clipBehavior;
+  final String? restorationId;
+  final bool scribbleEnabled;
+  final bool stylusHandwritingEnabled;
+  final bool enableIMEPersonalizedLearning;
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+  final bool canRequestFocus;
+  final SpellCheckConfiguration? spellCheckConfiguration;
+  final TextMagnifierConfiguration? magnifierConfiguration;
+  final List<Locale>? hintLocales;
+
+  static const String _obscureOverrideKey = 'el_input._obscureOverride';
+
   @override
-  State<ElInput> createState() => _ElInputState();
-}
+  Widget build(BuildContext context) {
+    $model[_obscureOverrideKey] = useState<bool?>(null);
+    return super.build(context);
+  }
 
-class _ElInputState extends ElInputModelValueState<ElInput, String> {
-  /// 显示、隐藏密码状态
-  bool? _obscureText;
-
-  void _togglePassword() {
-    setState(() {
-      if (_obscureText == true) {
-        _obscureText = false;
-      } else {
-        _obscureText = true;
-      }
-    });
+  @override
+  Widget obsBuilder(BuildContext context) {
+    final text = toTextEditing($obs.value);
+    final tc = controller ?? $textController;
+    if (text != tc.text) {
+      tc.value = TextEditingValue(text: text);
+    }
+    return buildInput(context);
   }
 
   @override
   Widget buildInput(BuildContext context) {
-    InputDecoration? decoration = widget.decoration;
+    final obscureOverride = $model[_obscureOverrideKey] as ValueNotifier<bool?>;
+    final effectiveObscure = obscureOverride.value ?? obscureText;
 
-    // 重新构建前缀、后缀图标
-    Widget? prefixIcon = decoration?.prefixIcon;
-    Widget? suffixIcon = decoration?.suffixIcon;
+    InputDecoration? effectiveDecoration = decoration;
 
-    if (widget.showPasswordIcon) {
-      _obscureText ??= widget.obscureText;
-      suffixIcon = ElButton.icon(
-        block: true,
-        onPressed: _togglePassword,
-        child: _obscureText == true ? Icons.visibility_off : Icons.visibility,
-      );
-    } else if (widget.clearable && modelValue.isNotEmpty) {
+    Widget? prefixIcon = effectiveDecoration?.prefixIcon;
+    Widget? suffixIcon = effectiveDecoration?.suffixIcon;
+
+    if (showPasswordIcon) {
       suffixIcon = ElButton.icon(
         block: true,
         onPressed: () {
-          widget.onClean?.call();
-          modelValue = '';
+          obscureOverride.value = !effectiveObscure;
         },
-        child: widget.cleanIcon,
+        child: effectiveObscure ? Icons.visibility_off : Icons.visibility,
+      );
+    } else if (clearable && $obs.value.isNotEmpty) {
+      suffixIcon = ElButton.icon(
+        block: true,
+        onPressed: () {
+          onClean?.call();
+          $obs.value = '';
+        },
+        child: cleanIcon,
       );
     }
 
-    // 由于清除了默认的图标约束，所以需要使用 AspectRatio 重新固定图标的尺寸
     if (prefixIcon != null) {
       prefixIcon = AspectRatio(
         aspectRatio: 1.0,
-        child: Padding(padding: .all(2), child: prefixIcon),
+        child: Padding(padding: const EdgeInsets.all(2), child: prefixIcon),
       );
     }
 
     if (suffixIcon != null) {
       suffixIcon = AspectRatio(
         aspectRatio: 1.0,
-        child: Padding(padding: .all(2), child: suffixIcon),
+        child: Padding(padding: const EdgeInsets.all(2), child: suffixIcon),
       );
     }
 
     if (prefixIcon != null || suffixIcon != null) {
-      if (decoration == null) {
-        decoration = InputDecoration(prefixIcon: prefixIcon, suffixIcon: suffixIcon);
+      if (effectiveDecoration == null) {
+        effectiveDecoration = InputDecoration(prefixIcon: prefixIcon, suffixIcon: suffixIcon);
       } else {
-        decoration = decoration.copyWith(prefixIcon: prefixIcon, suffixIcon: suffixIcon);
+        effectiveDecoration = effectiveDecoration.copyWith(prefixIcon: prefixIcon, suffixIcon: suffixIcon);
       }
     }
 
+    final tc = controller ?? $textController;
+    final fn = focusNode ?? $focusNode;
+    final sc = scrollController ?? $scrollController;
+
     return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      focusNode: focusNode,
-      scrollController: scrollController,
-      decoration: decoration,
-      keyboardType: widget.keyboardType,
-      textInputAction: widget.textInputAction,
-      textCapitalization: widget.textCapitalization,
-      style: widget.style,
-      strutStyle: widget.strutStyle,
-      textAlign: widget.textAlign,
-      textAlignVertical: widget.textAlignVertical,
-      textDirection: widget.textDirection,
-      readOnly: widget.readOnly,
-      toolbarOptions: widget.toolbarOptions,
-      showCursor: widget.showCursor,
-      autofocus: widget.autofocus,
-      obscureText: _obscureText ?? widget.obscureText,
-      obscuringCharacter: widget.obscuringCharacter,
-      autocorrect: widget.autocorrect,
-      smartDashesType: widget.smartDashesType,
-      smartQuotesType: widget.smartQuotesType,
-      enableSuggestions: widget.enableSuggestions,
-      minLines: widget.minLines,
-      maxLines: widget.maxLines,
-      expands: widget.expands,
-      maxLength: widget.maxLength,
-      maxLengthEnforcement: widget.maxLengthEnforcement,
-      onEditingComplete: widget.onEditingComplete,
-      onSubmitted: widget.onSubmitted,
-      onAppPrivateCommand: widget.onAppPrivateCommand,
-      inputFormatters: widget.inputFormatters,
-      enabled: widget.enabled,
-      ignorePointers: widget.ignorePointers,
-      cursorWidth: widget.cursorWidth,
-      cursorHeight: widget.cursorHeight,
-      cursorRadius: widget.cursorRadius,
-      cursorOpacityAnimates: widget.cursorOpacityAnimates,
-      cursorColor: widget.cursorColor,
-      cursorErrorColor: widget.cursorErrorColor,
-      selectionHeightStyle: widget.selectionHeightStyle,
-      selectionWidthStyle: widget.selectionWidthStyle,
-      keyboardAppearance: widget.keyboardAppearance,
-      scrollPadding: widget.scrollPadding,
-      dragStartBehavior: widget.dragStartBehavior,
-      enableInteractiveSelection: widget.enableInteractiveSelection,
-      selectAllOnFocus: widget.selectAllOnFocus,
-      selectionControls: widget.selectionControls,
-      onTap: widget.onTap,
-      onTapOutside: widget.onTapOutside,
-      onTapUpOutside: widget.onTapUpOutside,
-      mouseCursor: widget.mouseCursor,
-      buildCounter: widget.buildCounter,
-      scrollPhysics: widget.scrollPhysics,
-      autofillHints: widget.autofillHints,
-      contentInsertionConfiguration: widget.contentInsertionConfiguration,
-      clipBehavior: widget.clipBehavior,
-      restorationId: widget.restorationId,
-      scribbleEnabled: widget.scribbleEnabled,
-      stylusHandwritingEnabled: widget.stylusHandwritingEnabled,
-      enableIMEPersonalizedLearning: widget.enableIMEPersonalizedLearning,
-      contextMenuBuilder: widget.contextMenuBuilder,
-      canRequestFocus: widget.canRequestFocus,
-      spellCheckConfiguration: widget.spellCheckConfiguration,
-      magnifierConfiguration: widget.magnifierConfiguration,
-      hintLocales: widget.hintLocales,
+      controller: tc,
+      onChanged: (s) => $obs.value = s,
+      focusNode: fn,
+      undoController: undoController,
+      decoration: effectiveDecoration,
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      textCapitalization: textCapitalization,
+      style: style,
+      strutStyle: strutStyle,
+      textAlign: textAlign,
+      textAlignVertical: textAlignVertical,
+      textDirection: textDirection,
+      readOnly: readOnly,
+      toolbarOptions: toolbarOptions,
+      showCursor: showCursor,
+      autofocus: autofocus,
+      statesController: statesController,
+      obscuringCharacter: obscuringCharacter,
+      obscureText: effectiveObscure,
+      autocorrect: autocorrect,
+      smartDashesType: smartDashesType,
+      smartQuotesType: smartQuotesType,
+      enableSuggestions: enableSuggestions,
+      maxLines: maxLines,
+      minLines: minLines,
+      expands: expands,
+      maxLength: maxLength,
+      maxLengthEnforcement: maxLengthEnforcement,
+      onEditingComplete: onEditingComplete,
+      onSubmitted: onSubmitted,
+      onAppPrivateCommand: onAppPrivateCommand,
+      inputFormatters: inputFormatters,
+      enabled: enabled,
+      ignorePointers: ignorePointers,
+      cursorWidth: cursorWidth,
+      cursorHeight: cursorHeight,
+      cursorRadius: cursorRadius,
+      cursorOpacityAnimates: cursorOpacityAnimates,
+      cursorColor: cursorColor,
+      cursorErrorColor: cursorErrorColor,
+      selectionHeightStyle: selectionHeightStyle ?? BoxHeightStyle.tight,
+      selectionWidthStyle: selectionWidthStyle ?? BoxWidthStyle.tight,
+      keyboardAppearance: keyboardAppearance,
+      scrollPadding: scrollPadding,
+      dragStartBehavior: dragStartBehavior,
+      enableInteractiveSelection: enableInteractiveSelection,
+      selectAllOnFocus: selectAllOnFocus,
+      selectionControls: selectionControls,
+      onTap: onTap,
+      onTapOutside: onTapOutside,
+      onTapUpOutside: onTapUpOutside,
+      mouseCursor: mouseCursor,
+      buildCounter: buildCounter,
+      scrollController: sc,
+      scrollPhysics: scrollPhysics,
+      autofillHints: autofillHints,
+      contentInsertionConfiguration: contentInsertionConfiguration,
+      clipBehavior: clipBehavior,
+      restorationId: restorationId,
+      scribbleEnabled: scribbleEnabled,
+      stylusHandwritingEnabled: stylusHandwritingEnabled,
+      enableIMEPersonalizedLearning: enableIMEPersonalizedLearning,
+      contextMenuBuilder: contextMenuBuilder,
+      canRequestFocus: canRequestFocus,
+      spellCheckConfiguration: spellCheckConfiguration,
+      magnifierConfiguration: magnifierConfiguration,
+      hintLocales: hintLocales,
     );
   }
 }
