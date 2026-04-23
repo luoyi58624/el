@@ -11,24 +11,26 @@ class ElLoadingService extends ElSingleAnimatedOverlayService {
   @override
   int get zIndex => el.config.loadingIndex;
 
-  /// 打开一个 loading，每次打开一个新的 loading 都会关闭上一个 loading
-  Future<int> open(String text, {ElLoadingCloseModel? closeModel, int? zIndex}) => tasks.run(() async {
-    return replace(
-      (_, remove, r, h, s) => _ElLoadingWidget(
-        text: text,
-        closeModel: closeModel,
-        onConfirmClose: close,
-        removeOverlay: remove,
-        onRegisterRemoveHide: r,
-        onRegisterHideForOverlay: h,
-        onRegisterShowForOverlay: s,
-      ),
-      zIndex: zIndex,
-    );
-  });
+  /// 打开一个 loading，每次打开新的都会关闭当前 loading；全局只保留一个实例。
+  Future<void> open(String text, {ElLoadingCloseModel? closeModel, int? zIndex}) {
+    return tasks.run(() async {
+      await replace(
+        (_, remove, r, h, s) => _ElLoadingWidget(
+          text: text,
+          closeModel: closeModel,
+          onConfirmClose: close,
+          removeOverlay: remove,
+          onRegisterRemoveHide: r,
+          onRegisterHideForOverlay: h,
+          onRegisterShowForOverlay: s,
+        ),
+        zIndex: zIndex,
+      );
+    });
+  }
 
-  /// 关闭 loading
-  Future<void> close([int? id]) => tasks.run(() => removeOverlay(id));
+  /// 关闭当前 loading
+  Future<void> close() => tasks.run(() => removeOverlay());
 }
 
 class _ElLoadingWidget extends ElAnimatedOverlayWidget {

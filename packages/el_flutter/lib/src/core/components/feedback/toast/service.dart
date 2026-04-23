@@ -15,26 +15,27 @@ class ElToastService extends ElSingleAnimatedOverlayService {
   @override
   int get zIndex => el.config.toastIndex;
 
-  /// 构建自定义轻提示。
-  Future<int> builder(dynamic content, Widget Function(dynamic content) builder, {bool? tapClose, int? zIndex}) =>
-      tasks.run(() async {
-        return replace(
-      (_, remove, r, h, s) => _ElToastWidget(
-        tapClose: tapClose,
-        autoCloseDuration: Duration(milliseconds: el.config.messageDuration),
-        removeOverlay: remove,
-        onRegisterRemoveHide: r,
-        onRegisterHideForOverlay: h,
-        onRegisterShowForOverlay: s,
-        child: builder(content),
-      ),
-          zIndex: zIndex,
-        );
-      });
+  /// 构建自定义轻提示。全局只保留一条。
+  Future<void> builder(dynamic content, Widget Function(dynamic content) builder, {bool? tapClose, int? zIndex}) {
+    return tasks.run(() async {
+      await replace(
+        (_, remove, r, h, s) => _ElToastWidget(
+          tapClose: tapClose,
+          autoCloseDuration: Duration(milliseconds: el.config.messageDuration),
+          removeOverlay: remove,
+          onRegisterRemoveHide: r,
+          onRegisterHideForOverlay: h,
+          onRegisterShowForOverlay: s,
+          child: builder(content),
+        ),
+        zIndex: zIndex,
+      );
+    });
+  }
 
-  /// 默认 toast 显示在中间；
+  /// 默认 toast 显示在中间；  
   /// 当 type 不为 null 时，使用旧版主题 toast 的底部样式。
-  Future<int> show(dynamic content, {ElThemeType? type, bool? tapClose, int? zIndex}) {
+  Future<void> show(dynamic content, {ElThemeType? type, bool? tapClose, int? zIndex}) {
     return builder(
       content,
       (content) => type == null ? _Toast(content) : _ThemeToast(content, type),
@@ -43,22 +44,23 @@ class ElToastService extends ElSingleAnimatedOverlayService {
     );
   }
 
-  Future<int> primary(dynamic content, {bool? tapClose, int? zIndex}) =>
+  Future<void> primary(dynamic content, {bool? tapClose, int? zIndex}) =>
       show(content, type: .primary, tapClose: tapClose, zIndex: zIndex);
 
-  Future<int> success(dynamic content, {bool? tapClose, int? zIndex}) =>
+  Future<void> success(dynamic content, {bool? tapClose, int? zIndex}) =>
       show(content, type: .success, tapClose: tapClose, zIndex: zIndex);
 
-  Future<int> info(dynamic content, {bool? tapClose, int? zIndex}) =>
+  Future<void> info(dynamic content, {bool? tapClose, int? zIndex}) =>
       show(content, type: .info, tapClose: tapClose, zIndex: zIndex);
 
-  Future<int> warning(dynamic content, {bool? tapClose, int? zIndex}) =>
+  Future<void> warning(dynamic content, {bool? tapClose, int? zIndex}) =>
       show(content, type: .warning, tapClose: tapClose, zIndex: zIndex);
 
-  Future<int> error(dynamic content, {bool? tapClose, int? zIndex}) =>
+  Future<void> error(dynamic content, {bool? tapClose, int? zIndex}) =>
       show(content, type: .error, tapClose: tapClose, zIndex: zIndex);
 
-  Future<void> close([int? id]) => tasks.run(() => removeOverlay(id));
+  /// 关闭当前 toast
+  Future<void> close() => tasks.run(() => removeOverlay());
 }
 
 class _ElToastWidget extends ElAnimatedOverlayWidget {

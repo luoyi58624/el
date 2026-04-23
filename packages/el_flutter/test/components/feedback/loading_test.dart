@@ -9,10 +9,9 @@ void main() async {
   group('el.loading 服务测试', () {
     testWidgets('服务基础行为', (tester) async {
       await _runLoadingTest(tester, () async {
-        final id = await el.loading.open('加载中...');
+        await el.loading.open('加载中...');
         await _pumpLoading(tester);
 
-        expect(id, greaterThanOrEqualTo(0));
         expect(find.text('加载中...'), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
