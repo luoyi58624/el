@@ -28,13 +28,15 @@ class ElPromptService extends ElSingleAnimatedOverlayService {
     return _showPrompt<bool>(
       dismissResult: false,
       zIndex: zIndex,
-      builder: (remove, onHide) => _ElPromptWidget(
+      builder: (remove, r, h, s) => _ElPromptWidget(
         title: title,
         cancel: cancel,
         confirm: confirm,
         content: _ElPromptAlertContent(content: content),
-        remove: remove,
-        onHide: onHide,
+        removeOverlay: remove,
+        onRegisterRemoveHide: r,
+        onRegisterHideForOverlay: h,
+        onRegisterShowForOverlay: s,
         onCancel: cancel == null
             ? null
             : _buildAction(result: () => false, beforeClose: () => onCancel?.call() ?? true),
@@ -59,7 +61,7 @@ class ElPromptService extends ElSingleAnimatedOverlayService {
     return await _showPrompt<String>(
       dismissResult: '',
       zIndex: zIndex,
-      builder: (remove, onHide) => _ElPromptWidget(
+      builder: (remove, r, h, s) => _ElPromptWidget(
         title: title,
         cancel: cancel,
         confirm: confirm,
@@ -68,8 +70,10 @@ class ElPromptService extends ElSingleAnimatedOverlayService {
             return _ElPromptInputContent(placeholder: placeholder);
           },
         ),
-        remove: remove,
-        onHide: onHide,
+        removeOverlay: remove,
+        onRegisterRemoveHide: r,
+        onRegisterHideForOverlay: h,
+        onRegisterShowForOverlay: s,
         onCancel: cancel == null
             ? null
             : _buildAction(result: () => null, beforeClose: () => onCancel?.call(text.value) ?? true),
@@ -82,16 +86,21 @@ class ElPromptService extends ElSingleAnimatedOverlayService {
 
   Future<T> _showPrompt<T>({
     required T dismissResult,
-    required ElAnimatedOverlayWidget Function(AsyncCallback remove, ValueChanged<AsyncCallback> onHide) builder,
+    required ElAnimatedOverlayWidget Function(
+      AsyncCallback remove,
+      void Function(AsyncCallback) onRegisterRemoveHide,
+      void Function(AsyncCallback) onRegisterHideForOverlay,
+      void Function(AsyncCallback) onRegisterShowForOverlay,
+    ) builder,
     int? zIndex,
   }) async {
     late final Completer<Object?> completer;
     await tasks.run(() async {
-      await remove();
+      await removeOverlay();
       completer = Completer<Object?>();
       _currentCompleter = completer;
       _dismissResult = dismissResult;
-      insert(builder, zIndex: zIndex);
+      insertOverlay(builder, zIndex: zIndex);
     });
     return await completer.future as T;
   }
@@ -126,7 +135,7 @@ class ElPromptService extends ElSingleAnimatedOverlayService {
     final completer = _currentCompleter;
     if (id == null) return;
     if (completer?.isCompleted == false) completer?.complete(result);
-    await remove(id);
+    await removeOverlay(id);
     if (identical(_currentCompleter, completer)) _currentCompleter = null;
     _dismissResult = null;
   }
@@ -148,8 +157,10 @@ class _ElPromptWidget extends ElAnimatedOverlayWidget {
     required this.confirm,
     required this.onCancel,
     required this.onConfirm,
-    required super.remove,
-    required super.onHide,
+    required super.removeOverlay,
+    required super.onRegisterRemoveHide,
+    required super.onRegisterHideForOverlay,
+    required super.onRegisterShowForOverlay,
   });
 
   final String? title;

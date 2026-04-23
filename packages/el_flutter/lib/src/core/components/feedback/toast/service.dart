@@ -19,11 +19,13 @@ class ElToastService extends ElSingleAnimatedOverlayService {
   Future<int> builder(dynamic content, Widget Function(dynamic content) builder, {bool? tapClose, int? zIndex}) =>
       tasks.run(() async {
         return replace(
-      (remove, onHide) => _ElToastWidget(
+      (remove, r, h, s) => _ElToastWidget(
         tapClose: tapClose,
         autoCloseDuration: Duration(milliseconds: el.config.messageDuration),
-        remove: remove,
-        onHide: onHide,
+        removeOverlay: remove,
+        onRegisterRemoveHide: r,
+        onRegisterHideForOverlay: h,
+        onRegisterShowForOverlay: s,
         child: builder(content),
       ),
           zIndex: zIndex,
@@ -56,7 +58,7 @@ class ElToastService extends ElSingleAnimatedOverlayService {
   Future<int> error(dynamic content, {bool? tapClose, int? zIndex}) =>
       show(content, type: .error, tapClose: tapClose, zIndex: zIndex);
 
-  Future<void> close([int? id]) => tasks.run(() => remove(id));
+  Future<void> close([int? id]) => tasks.run(() => removeOverlay(id));
 }
 
 class _ElToastWidget extends ElAnimatedOverlayWidget {
@@ -64,8 +66,10 @@ class _ElToastWidget extends ElAnimatedOverlayWidget {
     required this.child,
     required this.tapClose,
     required this.autoCloseDuration,
-    required super.remove,
-    required super.onHide,
+    required super.removeOverlay,
+    required super.onRegisterRemoveHide,
+    required super.onRegisterHideForOverlay,
+    required super.onRegisterShowForOverlay,
   });
 
   final Widget child;

@@ -116,6 +116,7 @@ extension ElConfigDataExt on ElConfigData {
     int? promptIndex,
     int? messageIndex,
     int? toastIndex,
+    int? dialogIndex,
   }) {
     return ElConfigData(
       animationStyle: animationStyle ?? this.animationStyle,
@@ -137,6 +138,7 @@ extension ElConfigDataExt on ElConfigData {
       promptIndex: promptIndex ?? this.promptIndex,
       messageIndex: messageIndex ?? this.messageIndex,
       toastIndex: toastIndex ?? this.toastIndex,
+      dialogIndex: dialogIndex ?? this.dialogIndex,
     );
   }
 
@@ -160,5 +162,6 @@ extension ElConfigDataExt on ElConfigData {
     promptIndex,
     messageIndex,
     toastIndex,
+    dialogIndex,
   ];
 }

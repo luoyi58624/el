@@ -228,6 +228,7 @@ class ElConfigData with EquatableMixin {
     this.promptIndex = 200,
     this.messageIndex = 250,
     this.toastIndex = 300,
+    this.dialogIndex = 400,
   });
 
   /// 全局主题动画样式
@@ -297,6 +298,9 @@ class ElConfigData with EquatableMixin {
 
   /// toast 反馈层级
   final int toastIndex;
+
+  /// dialog、drawer 等内容类弹层共用的基础 zIndex；[ElAnimatedOverlayService.showOverlay] 会再叠加内部自增计数。
+  final int dialogIndex;
 
   /// 基础控件边框圆角（按钮、输入框）
   BorderRadius get borderRadius => .circular(rounded[ElLevelType.sm]!);

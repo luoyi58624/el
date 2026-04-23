@@ -71,8 +71,15 @@ class ElMessageService extends ElAnimatedOverlayService with ChangeNotifier {
     _messageList.add(model);
     notifyListeners();
 
-    model._overlayId = insert(
-      (remove, onHide) => _MessageWidget(message: model, service: this, remove: remove, onHide: onHide),
+    model._overlayId = insertOverlay(
+      (remove, r, h, s) => _MessageWidget(
+        message: model,
+        service: this,
+        removeOverlay: remove,
+        onRegisterRemoveHide: r,
+        onRegisterHideForOverlay: h,
+        onRegisterShowForOverlay: s,
+      ),
       zIndex: zIndex,
     );
   }
@@ -214,7 +221,7 @@ class ElMessageService extends ElAnimatedOverlayService with ChangeNotifier {
     if (overlayId == null) return;
     message._closing = true;
     notifyListeners();
-    await remove(overlayId);
+    await removeOverlay(overlayId);
   }
 
   @override

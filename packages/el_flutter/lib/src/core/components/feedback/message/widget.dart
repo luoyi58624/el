@@ -8,7 +8,14 @@ const double _messageGap = 8;
 
 /// 消息小部件，只负责处理消息显示、隐藏动画
 class _MessageWidget extends ElAnimatedOverlayWidget {
-  const _MessageWidget({required this.message, required this.service, required super.remove, required super.onHide});
+  const _MessageWidget({
+    required this.message,
+    required this.service,
+    required super.removeOverlay,
+    required super.onRegisterRemoveHide,
+    required super.onRegisterHideForOverlay,
+    required super.onRegisterShowForOverlay,
+  });
 
   final _MessageModel message;
   final ElMessageService service;

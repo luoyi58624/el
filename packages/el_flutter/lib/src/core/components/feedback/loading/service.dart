@@ -14,14 +14,21 @@ class ElLoadingService extends ElSingleAnimatedOverlayService {
   /// 打开一个 loading，每次打开一个新的 loading 都会关闭上一个 loading
   Future<int> open(String text, {ElLoadingCloseModel? closeModel, int? zIndex}) => tasks.run(() async {
     return replace(
-      (remove, onHide) =>
-          _ElLoadingWidget(text: text, closeModel: closeModel, onConfirmClose: close, remove: remove, onHide: onHide),
+      (remove, r, h, s) => _ElLoadingWidget(
+        text: text,
+        closeModel: closeModel,
+        onConfirmClose: close,
+        removeOverlay: remove,
+        onRegisterRemoveHide: r,
+        onRegisterHideForOverlay: h,
+        onRegisterShowForOverlay: s,
+      ),
       zIndex: zIndex,
     );
   });
 
   /// 关闭 loading
-  Future<void> close([int? id]) => tasks.run(() => remove(id));
+  Future<void> close([int? id]) => tasks.run(() => removeOverlay(id));
 }
 
 class _ElLoadingWidget extends ElAnimatedOverlayWidget {
@@ -29,8 +36,10 @@ class _ElLoadingWidget extends ElAnimatedOverlayWidget {
     required this.text,
     this.closeModel,
     required this.onConfirmClose,
-    required super.remove,
-    required super.onHide,
+    required super.removeOverlay,
+    required super.onRegisterRemoveHide,
+    required super.onRegisterHideForOverlay,
+    required super.onRegisterShowForOverlay,
   });
 
   final String text;
