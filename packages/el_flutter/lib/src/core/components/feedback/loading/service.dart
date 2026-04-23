@@ -14,7 +14,7 @@ class ElLoadingService extends ElSingleAnimatedOverlayService {
   /// 打开一个 loading，每次打开一个新的 loading 都会关闭上一个 loading
   Future<int> open(String text, {ElLoadingCloseModel? closeModel, int? zIndex}) => tasks.run(() async {
     return replace(
-      (remove, r, h, s) => _ElLoadingWidget(
+      (_, remove, r, h, s) => _ElLoadingWidget(
         text: text,
         closeModel: closeModel,
         onConfirmClose: close,

@@ -19,7 +19,7 @@ class ElToastService extends ElSingleAnimatedOverlayService {
   Future<int> builder(dynamic content, Widget Function(dynamic content) builder, {bool? tapClose, int? zIndex}) =>
       tasks.run(() async {
         return replace(
-      (remove, r, h, s) => _ElToastWidget(
+      (_, remove, r, h, s) => _ElToastWidget(
         tapClose: tapClose,
         autoCloseDuration: Duration(milliseconds: el.config.messageDuration),
         removeOverlay: remove,

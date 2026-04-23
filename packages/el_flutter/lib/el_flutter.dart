@@ -27,6 +27,7 @@ export 'src/core/components/feedback/popup/index.dart';
 export 'src/core/components/feedback/prompt/index.dart';
 export 'src/core/components/feedback/toast/index.dart';
 export 'src/core/components/feedback/modal/index.dart';
+export 'src/core/components/feedback/dialog2/index.dart';
 
 export 'src/core/components/form/autocomplete.dart';
 export 'src/core/components/form/cascader.dart';

@@ -28,7 +28,7 @@ class ElPromptService extends ElSingleAnimatedOverlayService {
     return _showPrompt<bool>(
       dismissResult: false,
       zIndex: zIndex,
-      builder: (remove, r, h, s) => _ElPromptWidget(
+      builder: (_, remove, r, h, s) => _ElPromptWidget(
         title: title,
         cancel: cancel,
         confirm: confirm,
@@ -61,7 +61,7 @@ class ElPromptService extends ElSingleAnimatedOverlayService {
     return await _showPrompt<String>(
       dismissResult: '',
       zIndex: zIndex,
-      builder: (remove, r, h, s) => _ElPromptWidget(
+      builder: (_, remove, r, h, s) => _ElPromptWidget(
         title: title,
         cancel: cancel,
         confirm: confirm,
@@ -87,6 +87,7 @@ class ElPromptService extends ElSingleAnimatedOverlayService {
   Future<T> _showPrompt<T>({
     required T dismissResult,
     required ElAnimatedOverlayWidget Function(
+      int overlayId,
       AsyncCallback remove,
       void Function(AsyncCallback) onRegisterRemoveHide,
       void Function(AsyncCallback) onRegisterHideForOverlay,

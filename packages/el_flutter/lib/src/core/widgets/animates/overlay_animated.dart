@@ -25,6 +25,7 @@ int _sortKeyForLayer(_ElOverlayItem a) {
 
 /// 构建由 [ElAnimatedOverlayService.insertOverlay] 插入的弹层小部件，并注册 [remove]、各阶段动画等回调。
 typedef ElAnimatedOverlayInsertBuilder = ElAnimatedOverlayWidget Function(
+  int overlayId,
   AsyncCallback removeOverlay,
   void Function(AsyncCallback) onRegisterRemoveHide,
   void Function(AsyncCallback) onRegisterHideForOverlay,
@@ -60,6 +61,7 @@ abstract class ElAnimatedOverlayService {
     item = _ElOverlayItem(
       entry: OverlayEntry(
         builder: (context) => builder(
+          id,
           () => removeOverlay(id),
           (c) => item.hideForRemove = c,
           (c) => item.hideForOverlay = c,
