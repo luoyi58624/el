@@ -4,6 +4,15 @@ import 'package:flutter/material.dart';
 
 part 'hook.dart';
 
+// /// 支持双向绑定的组件类型
+// enum ElModelValueType {
+//   /// 支持单个数据的双向绑定
+//   single,
+//
+//   /// 支持多个数据的双向绑定
+//   multi,
+// }
+
 abstract class ElModelValue<D> extends HookWidget {
   ElModelValue({super.key, this.value, this.modelValue, this.onChanged});
 
