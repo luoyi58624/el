@@ -1,4 +1,8 @@
-part of 'index.dart';
+import 'package:el_flutter/ext.dart';
+import 'package:el_model_value/el_model_value.dart';
+import 'package:flutter/widgets.dart';
+
+part 'input_number.dart';
 
 abstract class ElInputModelValue<D> extends ElFormModelValue<D> {
   ElInputModelValue({
