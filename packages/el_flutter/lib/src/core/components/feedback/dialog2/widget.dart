@@ -4,7 +4,7 @@ class _ElDialog2Widget extends ElAnimatedOverlayWidget {
   // ignore: prefer_const_constructors_in_immutables
   _ElDialog2Widget({
     required this.handle,
-    required this.content,
+    required this.body,
     required super.removeOverlay,
     required super.onRegisterRemoveHide,
     required super.onRegisterHideForOverlay,
@@ -12,7 +12,7 @@ class _ElDialog2Widget extends ElAnimatedOverlayWidget {
   });
 
   final ElOverlayHandle handle;
-  final ValueNotifier<Widget?> content;
+  final Widget body;
 
   @override
   State<_ElDialog2Widget> createState() => _ElDialog2WidgetState();
@@ -33,19 +33,11 @@ class _ElDialog2WidgetState extends ElAnimatedOverlayWidgetState<_ElDialog2Widge
               Positioned.fill(
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
-                  onTap: () => unawaited(el.dialog2.close(widget.handle)),
+                  onTap: () => unawaited(el.dialog2._backdrop(widget.handle)),
                   child: ColoredBox(color: Colors.black54),
                 ),
               ),
-              Center(
-                child: ValueListenableBuilder<Widget?>(
-                  valueListenable: widget.content,
-                  builder: (context, w, _) {
-                    if (w == null) return const SizedBox.shrink();
-                    return w;
-                  },
-                ),
-              ),
+              Center(child: widget.body),
             ],
           ),
         ),
