@@ -1,4 +1,5 @@
-import 'package:el_ui/el_ui.dart';
+import 'package:el_model_value/el_model_value.dart';
+import 'package:el_ui/el_ui.dart' hide ElModelValue, ElModelValueMixin, ElStatelessModelValue;
 import 'package:flutter/material.dart';
 
 part 'group.dart';
@@ -8,7 +9,7 @@ class ElRadio extends StatelessWidget {
   const ElRadio({super.key, this.value, this.label, this.color, this.disabled = false});
 
   /// 单选框的值，如果为 null，则默认使用 [label]
-  final dynamic value;
+  final Object? value;
 
   /// 单选框标签，如果为 null 则只渲染 [Radio] 小部件
   final String? label;
@@ -19,7 +20,7 @@ class ElRadio extends StatelessWidget {
   /// 是否禁用
   final bool disabled;
 
-  dynamic get _selectedValue => value ?? label;
+  Object? get _selectedValue => value ?? label;
 
   double get disabledOpacity => 0.5;
 
@@ -30,8 +31,8 @@ class ElRadio extends StatelessWidget {
   }
 
   /// 构建单选框小部件
-  Widget buildRadio(BuildContext context, ElRadioGroupState state) {
-    return Radio<dynamic>(
+  Widget buildRadio(BuildContext context, ElRadioGroupScope scope) {
+    return Radio<Object?>(
       value: _selectedValue,
       mouseCursor: cursor,
       enabled: !disabled,
@@ -41,23 +42,23 @@ class ElRadio extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final state = ElRadioGroup.of(context);
-    Widget result = buildRadio(context, state);
+    final scope = ElRadioGroup.of(context);
+    Widget result = buildRadio(context, scope);
 
     if (label != null) {
-      final isSelected = _selectedValue == state.modelValue;
+      final isSelected = _selectedValue == scope.modelValue;
       final textColor = context.elDefaultColor.elTextColor(context);
       result = MouseRegion(
         cursor: cursor,
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: disabled ? null : () => state.modelValue = _selectedValue,
+          onTap: disabled ? null : () => scope.modelValue = _selectedValue,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               result,
               ElRichText(
-                label,
+                label!,
                 style: context.elTextStyle.copyWith(
                   fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
                   color: disabled
