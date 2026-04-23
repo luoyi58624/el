@@ -11,27 +11,19 @@ class ElLoadingService extends ElSingleAnimatedOverlayService {
   @override
   int get zIndex => el.config.loadingIndex;
 
-  /// 显示一个 loading，每次打开新的都会关闭当前 loading；全局只保留一个实例。
-  Future<void> show(String text, {ElLoadingCloseModel? closeModel, int? zIndex}) {
+  /// 打开一个 loading，每次打开新的都会关闭当前 loading；全局只保留一个实例。
+  Future<void> open(String text, {ElLoadingCloseModel? closeModel, int? zIndex}) {
     return tasks.run(() async {
       await replace(
-        (_, remove, r, h, s) => _ElLoadingWidget(
+        (handle) => _ElLoadingWidget(
+          handle: handle,
           text: text,
           closeModel: closeModel,
           onConfirmClose: close,
-          removeOverlay: remove,
-          onRegisterRemoveHide: r,
-          onRegisterHideForOverlay: h,
-          onRegisterShowForOverlay: s,
         ),
         zIndex: zIndex,
       );
     });
-  }
-
-  /// 兼容旧 API，等效于 [show]。
-  Future<void> open(String text, {ElLoadingCloseModel? closeModel, int? zIndex}) {
-    return show(text, closeModel: closeModel, zIndex: zIndex);
   }
 
   /// 关闭当前 loading
@@ -40,13 +32,10 @@ class ElLoadingService extends ElSingleAnimatedOverlayService {
 
 class _ElLoadingWidget extends ElAnimatedOverlayWidget {
   const _ElLoadingWidget({
+    required super.handle,
     required this.text,
     this.closeModel,
     required this.onConfirmClose,
-    required super.removeOverlay,
-    required super.onRegisterRemoveHide,
-    required super.onRegisterHideForOverlay,
-    required super.onRegisterShowForOverlay,
   });
 
   final String text;
@@ -73,11 +62,11 @@ class _ElLoadingWidgetState extends ElAnimatedOverlayWidgetState<_ElLoadingWidge
     final shouldClosePrompt = _interactionState == _LoadingInteractionState.confirming;
     _interactionState = _LoadingInteractionState.closing;
     if (!shouldClosePrompt) {
-      await controller.reverse();
+      await super.hide();
       return;
     }
     // 如果 loading 在确认框弹出期间被外部关闭，确认框也一起关闭。
-    await Future.wait([controller.reverse(), el.prompt.close()]);
+    await Future.wait([super.hide(), el.prompt.close()]);
   }
 
   @override

@@ -9,12 +9,9 @@ const double _messageGap = 8;
 /// 消息小部件，只负责处理消息显示、隐藏动画
 class _MessageWidget extends ElAnimatedOverlayWidget {
   const _MessageWidget({
+    required super.handle,
     required this.message,
     required this.service,
-    required super.removeOverlay,
-    required super.onRegisterRemoveHide,
-    required super.onRegisterHideForOverlay,
-    required super.onRegisterShowForOverlay,
   });
 
   final _MessageModel message;
@@ -58,7 +55,7 @@ class _MessageWidgetState extends ElAnimatedOverlayWidgetState<_MessageWidget> {
   Future<void> hide() async {
     _removeTimer?.cancel();
     _removeTimer = null;
-    await controller.reverse();
+    await super.hide();
   }
 
   @override

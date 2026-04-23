@@ -15,18 +15,18 @@ class ElToastService extends ElSingleAnimatedOverlayService {
   @override
   int get zIndex => el.config.toastIndex;
 
-  /// 构建自定义轻提示。全局只保留一条。
-  Future<void> builder(dynamic content, Widget Function(dynamic content) builder, {bool? tapClose, int? zIndex}) {
+  Future<void> _showWidget(
+    Widget child, {
+    bool? tapClose,
+    int? zIndex,
+  }) {
     return tasks.run(() async {
       await replace(
-        (_, remove, r, h, s) => _ElToastWidget(
+        (handle) => _ElToastWidget(
+          handle: handle,
           tapClose: tapClose,
           autoCloseDuration: Duration(milliseconds: el.config.messageDuration),
-          removeOverlay: remove,
-          onRegisterRemoveHide: r,
-          onRegisterHideForOverlay: h,
-          onRegisterShowForOverlay: s,
-          child: builder(content),
+          child: child,
         ),
         zIndex: zIndex,
       );
@@ -36,9 +36,8 @@ class ElToastService extends ElSingleAnimatedOverlayService {
   /// 默认 toast 显示在中间；
   /// 当 type 不为 null 时，使用旧版主题 toast 的底部样式。
   Future<void> show(dynamic content, {ElThemeType? type, bool? tapClose, int? zIndex}) {
-    return builder(
-      content,
-      (content) => type == null ? _Toast(content) : _ThemeToast(content, type),
+    return _showWidget(
+      type == null ? _Toast(content) : _ThemeToast(content, type),
       tapClose: tapClose,
       zIndex: zIndex,
     );
@@ -62,13 +61,10 @@ class ElToastService extends ElSingleAnimatedOverlayService {
 
 class _ElToastWidget extends ElAnimatedOverlayWidget {
   const _ElToastWidget({
+    required super.handle,
     required this.child,
     required this.tapClose,
     required this.autoCloseDuration,
-    required super.removeOverlay,
-    required super.onRegisterRemoveHide,
-    required super.onRegisterHideForOverlay,
-    required super.onRegisterShowForOverlay,
   });
 
   final Widget child;

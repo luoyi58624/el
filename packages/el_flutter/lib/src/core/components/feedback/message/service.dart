@@ -72,13 +72,10 @@ class ElMessageService extends ElAnimatedOverlayService with ChangeNotifier {
     notifyListeners();
 
     model._handle = insertOverlay(
-      (_, remove, r, h, s) => _MessageWidget(
+      (handle) => _MessageWidget(
+        handle: handle,
         message: model,
         service: this,
-        removeOverlay: remove,
-        onRegisterRemoveHide: r,
-        onRegisterHideForOverlay: h,
-        onRegisterShowForOverlay: s,
       ),
       zIndex: zIndex,
     );

@@ -21,13 +21,9 @@ class ElDialog2Service extends ElAnimatedOverlayService {
   /// 创建可复用的 dialog 句柄。默认遮罩点击只隐藏（保留状态）。
   ElOverlayHandle createHandle(Widget child, {bool hideOnClose = true}) {
     final handle = createOverlayHandle(
-      (overlayHandle, remove, onRemoveHide, onHideForOverlay, onShowForOverlay) => _ElDialog2Widget(
+      (overlayHandle) => _ElDialog2Widget(
         handle: overlayHandle,
         body: child,
-        removeOverlay: remove,
-        onRegisterRemoveHide: onRemoveHide,
-        onRegisterHideForOverlay: onHideForOverlay,
-        onRegisterShowForOverlay: onShowForOverlay,
       ),
     );
     _dialogs[handle] = (body: child, hideOnClose: hideOnClose);

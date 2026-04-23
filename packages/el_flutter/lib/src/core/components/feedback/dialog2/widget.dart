@@ -3,15 +3,10 @@ part of 'index.dart';
 class _ElDialog2Widget extends ElAnimatedOverlayWidget {
   // ignore: prefer_const_constructors_in_immutables
   _ElDialog2Widget({
-    required this.handle,
+    required super.handle,
     required this.body,
-    required super.removeOverlay,
-    required super.onRegisterRemoveHide,
-    required super.onRegisterHideForOverlay,
-    required super.onRegisterShowForOverlay,
   });
 
-  final ElOverlayHandle handle;
   final Widget body;
 
   @override
@@ -32,6 +27,7 @@ class _ElDialog2WidgetState extends ElAnimatedOverlayWidgetState<_ElDialog2Widge
             children: [
               Positioned.fill(
                 child: GestureDetector(
+                  key: const ValueKey('el_dialog2_backdrop'),
                   behavior: HitTestBehavior.opaque,
                   onTap: () => unawaited(el.dialog2._onBackdropTap(widget.handle)),
                   child: ColoredBox(color: Colors.black54),
