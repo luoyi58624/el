@@ -40,30 +40,6 @@ Timer useInterval(VoidCallback fun, int wait) {
   return timer;
 }
 
-/// 创建代理 [HookWidget] 实例对象，它返回一个不可变对象 [ElProxyHookWidgetRef]，
-/// 内部持有当前最新的 [HookWidget] 实例。
-///
-/// 当 [HookWidget] 重建时，闭包函数可以通过此 proxy 访问最新的 Widget 属性。
-ElProxyHookWidgetRef<W> useProxyHookWidget<W extends HookWidget>(W widget) {
-  final proxy = useMemoized(() => ElProxyHookWidgetRef<W>());
-  proxy._widget = widget;
-
-  useEffect(() {
-    return () => proxy._widget = null;
-  }, []);
-
-  return proxy;
-}
-
-class ElProxyHookWidgetRef<W extends HookWidget> {
-  W? _widget;
-
-  W get widget {
-    assert(_widget != null, 'ElProxyHookWidgetRef Error: 当前代理的 widget 已被清除！');
-    return _widget!;
-  }
-}
-
 /// 支持在 [HookWidget] 中使用 [Obs] 响应式变量
 Obs<T> useObs<T>(
   T value, {
