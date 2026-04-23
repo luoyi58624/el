@@ -110,12 +110,14 @@ class _ElToastWidgetState extends ElAnimatedOverlayWidgetState<_ElToastWidget> {
 
   @override
   Widget build(BuildContext context) => Positioned.fill(
-    child: FadeTransition(
-      opacity: controller,
-      child: IgnorePointer(
-        // 默认不接管手势，保证不影响页面下方操作。
-        ignoring: widget.tapClose != true,
-        child: GestureDetector(onTap: close, child: widget.child),
+    child: overlayPointerFilter(
+      FadeTransition(
+        opacity: controller,
+        child: IgnorePointer(
+          // 默认不接管手势，保证不影响页面下方操作。
+          ignoring: widget.tapClose != true,
+          child: GestureDetector(onTap: close, child: widget.child),
+        ),
       ),
     ),
   );

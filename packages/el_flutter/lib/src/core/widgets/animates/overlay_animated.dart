@@ -2,14 +2,73 @@ import 'package:el_flutter/el_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class _ElOverlayItem {
-  _ElOverlayItem({required this.entry, required this.zIndex, required this.seq});
+/// 与单次 [insertOverlay] 一一对应。通过 [remove] / [hide] / [show] 操作该层，无需使用整型 id。  
+/// 在弹层子树中可使用 [of] 取得当前句柄并关闭本层，例如 `ElOverlayHandle.of(context).remove()`。
+class ElOverlayHandle {
+  ElOverlayHandle._(this._owner);
 
+  final ElAnimatedOverlayService _owner;
+  var _isActive = true;
+
+  bool get isActive => _isActive;
+
+  void _deactivate() {
+    _isActive = false;
+  }
+
+  /// 调用 [maybeOf]；为 [null] 时 debug 下 [assert] 失败。不建立对 inherited 的依赖，与 [maybeOf] 相同。
+  static ElOverlayHandle of(BuildContext context) {
+    final handle = maybeOf(context);
+    assert(handle != null, 'ElOverlayHandle.of: no overlay handle in this context');
+    return handle!;
+  }
+
+  /// 不建立与弹层注入的依赖，未找到时返回 [null]。
+  static ElOverlayHandle? maybeOf(BuildContext context) {
+    return _ElOverlayScope.maybeOf(context);
+  }
+
+  /// 与 [ElAnimatedOverlayService.removeOverlay] 等效：先播注册过的移除前隐藏动画，再 [OverlayEntry.remove] + [dispose]。
+  Future<void> remove() {
+    if (!_isActive) return Future.value();
+    return _owner._removeEntry(this);
+  }
+
+  /// 与 [ElAnimatedOverlayService] 的 [hideForOverlay] 等效，仅播隐藏动画，不移除 entry。
+  Future<void> hide() {
+    if (!_isActive) return Future.value();
+    return _owner._hideForOverlayByHandle(this);
+  }
+
+  /// 与 [showOverlayAgain] 等效，更新层级并再播 overlay 内注册的 [show] 动画。
+  Future<void> show() {
+    if (!_isActive) return Future.value();
+    return _owner._showAgainByHandle(this);
+  }
+}
+
+/// 将 [ElOverlayHandle] 注入弹层子树，供 [ElOverlayHandle.of] / [maybeOf] 解析。
+class _ElOverlayScope extends InheritedWidget {
+  const _ElOverlayScope({required this.handle, required super.child});
+
+  final ElOverlayHandle handle;
+
+  static ElOverlayHandle? maybeOf(BuildContext context) {
+    return context.getInheritedWidgetOfExactType<_ElOverlayScope>()?.handle;
+  }
+
+  @override
+  bool updateShouldNotify(_ElOverlayScope oldWidget) => oldWidget.handle != handle;
+}
+
+class _ElOverlayItem {
+  _ElOverlayItem({required this.handle, required this.entry, required this.zIndex, required this.seq});
+
+  final ElOverlayHandle handle;
   final OverlayEntry entry;
   final int zIndex;
   final int seq;
 
-  /// 调用 [showOverlay] 时写入：等于 [el.config.dialogIndex] + 全局自增，用于在同类弹层中排序。
   int? zShowKey;
 
   AsyncCallback? hideForRemove;
@@ -23,110 +82,108 @@ int _sortKeyForLayer(_ElOverlayItem a) {
   return a.zIndex * 1000000 + a.seq;
 }
 
-/// 构建由 [ElAnimatedOverlayService.insertOverlay] 插入的弹层小部件，并注册 [remove]、各阶段动画等回调。
+/// 第一个参数为 [insertOverlay] 返回的 [ElOverlayHandle]（子树中可通过 [ElOverlayHandle.of] 取得同一句柄）；  
+/// [removeOverlay] 一般传 `() => handle.remove()` 即可，与 [handle.remove] 等价。
 typedef ElAnimatedOverlayInsertBuilder = ElAnimatedOverlayWidget Function(
-  int overlayId,
+  ElOverlayHandle handle,
   AsyncCallback removeOverlay,
   void Function(AsyncCallback) onRegisterRemoveHide,
   void Function(AsyncCallback) onRegisterHideForOverlay,
   void Function(AsyncCallback) onRegisterShowForOverlay,
 );
 
-/// 全局 overlay 基类：
-/// 1. 统一维护 entry 生命周期
-/// 2. 支持按 zIndex 排序
-/// 3. 移除前先等待子组件执行隐藏动画
-/// 4. 支持 [hideOverlay] 仅播隐藏动画不移除，以及 [showOverlay] 重排并再次显示
+/// 全局 overlay 基类。内部用 [ElOverlayHandle] 作为 [Map] 的键，语义上等价于在活跃集合中按对象引用去重、查找。
 abstract class ElAnimatedOverlayService {
   static final _layers = <_ElOverlayItem>[];
   static int _seq = 0;
 
-  /// 与 [el.config.dialogIndex] 相加，[showOverlay] 每调用一次自增 1，用于在 dialog/drawer 等之间确定先后层级。
   static int _showOrder = 0;
 
-  final _queue = <int, _ElOverlayItem>{};
-  int _id = 0;
+  final _byHandle = <ElOverlayHandle, _ElOverlayItem>{};
+
   @protected
   final tasks = ElAsyncUtil.serialQueue();
 
-  /// 数值越大，层级越高；未设置 [zIndex] 时子类可覆写为默认基准。
   @protected
   int get zIndex => 0;
 
-  /// 插入一个 overlay，并返回服务层分配的 overlay id。
   @protected
-  int insertOverlay(ElAnimatedOverlayInsertBuilder builder, {int? zIndex}) {
-    final id = _id++;
+  ElOverlayHandle insertOverlay(ElAnimatedOverlayInsertBuilder builder, {int? zIndex}) {
+    final h = ElOverlayHandle._(this);
     late final _ElOverlayItem item;
     item = _ElOverlayItem(
+      handle: h,
       entry: OverlayEntry(
-        builder: (context) => builder(
-          id,
-          () => removeOverlay(id),
-          (c) => item.hideForRemove = c,
-          (c) => item.hideForOverlay = c,
-          (c) => item.showForOverlay = c,
-        ),
+        builder: (context) {
+          return _ElOverlayScope(
+            handle: h,
+            child: builder(
+              h,
+              h.remove,
+              (c) => item.hideForRemove = c,
+              (c) => item.hideForOverlay = c,
+              (c) => item.showForOverlay = c,
+            ),
+          );
+        },
       ),
       zIndex: zIndex ?? this.zIndex,
       seq: _seq++,
     );
-    _queue[id] = item;
+    _byHandle[h] = item;
     _insertItem(item);
-    return id;
+    return h;
   }
 
-  /// 同一个 entry 只会执行一次移除流程，避免重复调用打断动画。
   @protected
-  Future<void> removeOverlay(int id) {
-    final item = _queue[id];
-    if (item == null) return Future.value();
-    return item.removing ??= _remove(id, item);
+  Future<void> removeOverlay(ElOverlayHandle handle) {
+    if (!handle._isActive) return Future.value();
+    return _removeEntry(handle);
   }
 
-  Future<void> _remove(int id, _ElOverlayItem item) async {
+  Future<void> _removeEntry(ElOverlayHandle handle) {
+    if (!handle._isActive) return Future.value();
+    final item = _byHandle[handle];
+    if (item == null) return Future.value();
+    return item.removing ??= _removeByHandleAndDisposeItem(handle, item);
+  }
+
+  Future<void> _removeByHandleAndDisposeItem(ElOverlayHandle handle, _ElOverlayItem item) async {
     final hide = item.hideForRemove;
     if (hide != null) {
       await hide();
     }
-    if (_queue.remove(id) == null) return;
+    if (_byHandle.remove(handle) == null) return;
     _layers.remove(item);
-    onRemoved(id);
+    onRemoved(handle);
+    handle._deactivate();
     item.entry.remove();
     item.entry.dispose();
   }
 
-  /// 仅播隐藏动画，不移除 [OverlayEntry]、不 [dispose]。
-  ///
-  /// 依赖子类 [ElAnimatedOverlayWidget] 在 [onRegisterHideForOverlay] 中注册动画，否则为 no-op。
+  /// 不再包 [tasks.run]，避免与 [tasks] 外层嵌套时死锁（例如 [ElOverlayHandle.hide] 在已排队的 [close] 内调用）。
   @protected
-  Future<void> hideOverlay(int id) {
-    return tasks.run(() async {
-      final item = _queue[id];
-      if (item == null) return;
-      final hide = item.hideForOverlay;
-      if (hide == null) return;
-      await hide();
-    });
+  Future<void> _hideForOverlayByHandle(ElOverlayHandle handle) async {
+    final item = _byHandle[handle];
+    if (item == null) return;
+    final hide = item.hideForOverlay;
+    if (hide == null) return;
+    await hide();
   }
 
-  /// 为已存在且仍挂载的 entry 提升层级并再次显示；写入 [zShowKey] 后自增全局计数，并重新 [Overlay.insert]。
-  ///
-  /// 为调整顺序会从 Overlay 中 [OverlayEntry.remove] 再插回，可能触发子树重新挂载；有状态需求时请外提状态或参考文档。
+  /// 同 [_hideForOverlayByHandle]。
   @protected
-  Future<void> showOverlay(int id) {
-    return tasks.run(() async {
-      final item = _queue[id];
-      if (item == null) return;
-      item.zShowKey = el.config.dialogIndex + ++_showOrder;
-      if (item.entry.mounted) {
-        _relayerItem(item);
-      }
-      final show = item.showForOverlay;
-      if (show != null) {
-        await show();
-      }
-    });
+  Future<void> _showAgainByHandle(ElOverlayHandle handle) async {
+    final item = _byHandle[handle];
+    if (item == null) return;
+    item.zShowKey = el.config.dialogIndex + ++_showOrder;
+    if (item.entry.mounted) {
+      _relayerItem(item);
+    }
+    final show = item.showForOverlay;
+    if (show != null) {
+      await show();
+    }
   }
 
   void _relayerItem(_ElOverlayItem item) {
@@ -154,53 +211,45 @@ abstract class ElAnimatedOverlayService {
     el.overlay.insert(item.entry, below: below);
   }
 
-  /// 当某个 overlay 已经完成隐藏并被真正移除后触发。
   @protected
-  void onRemoved(int id) {}
+  void onRemoved(ElOverlayHandle handle) {}
 }
 
-/// 单实例 overlay 服务基类。
-///
-/// 同一时间只维护一个当前 overlay，适合 toast、loading、prompt 这类
-/// “ 新内容出现前先替换掉旧内容 ” 的场景。
+/// 单实例：toast、loading、prompt 等，页面同时只保留一个 overlay。
 abstract class ElSingleAnimatedOverlayService extends ElAnimatedOverlayService {
-  int? _currentId;
-
-  /// 当前仍由该 service 管理的 overlay id。
-  @protected
-  int? get currentId => _currentId;
+  ElOverlayHandle? _current;
 
   @protected
-  set currentId(int? value) => _currentId = value;
+  ElOverlayHandle? get currentHandle => _current;
 
-  /// 插入并记录当前 overlay。
+  @protected
+  set currentHandle(ElOverlayHandle? v) => _current = v;
+
+  @protected
   @override
-  @protected
-  int insertOverlay(ElAnimatedOverlayInsertBuilder builder, {int? zIndex}) {
-    return _currentId = super.insertOverlay(builder, zIndex: zIndex);
+  ElOverlayHandle insertOverlay(ElAnimatedOverlayInsertBuilder builder, {int? zIndex}) {
+    return _current = super.insertOverlay(builder, zIndex: zIndex);
   }
 
-  /// 关闭旧 overlay 后插入新的当前 overlay。
   @protected
-  Future<int> replace(ElAnimatedOverlayInsertBuilder builder, {int? zIndex}) async {
+  Future<ElOverlayHandle> replace(ElAnimatedOverlayInsertBuilder builder, {int? zIndex}) async {
     await removeOverlay();
     return insertOverlay(builder, zIndex: zIndex);
   }
 
-  /// 关闭当前 overlay；传入 [id] 时关闭指定的当前 overlay。
   @override
   @protected
-  Future<void> removeOverlay([int? id]) async {
-    final target = id ?? _currentId;
-    if (target == null) return;
-    await super.removeOverlay(target);
-    if (_currentId == target) _currentId = null;
+  Future<void> removeOverlay([ElOverlayHandle? handle]) async {
+    final h = handle ?? _current;
+    if (h == null) return;
+    await super.removeOverlay(h);
+    if (identical(_current, h)) _current = null;
   }
 
   @protected
   @override
-  void onRemoved(int id) {
-    if (_currentId == id) _currentId = null;
+  void onRemoved(ElOverlayHandle handle) {
+    if (identical(_current, handle)) _current = null;
   }
 }
 
@@ -214,27 +263,24 @@ abstract class ElAnimatedOverlayWidget extends StatefulWidget {
     required this.onRegisterShowForOverlay,
   });
 
-  /// 从 overlay 中真正 [OverlayEntry.remove] 并 [dispose] 的回调。
   @protected
   final AsyncCallback removeOverlay;
 
-  /// 在 [ElAnimatedOverlayService.removeOverlay] 前调用的「隐藏 + 可衔接移除」注册。
   @protected
   final ValueChanged<AsyncCallback> onRegisterRemoveHide;
 
-  /// 在 [ElAnimatedOverlayService.hideOverlay] 中仅做隐藏、不移除的动画注册。
   @protected
   final ValueChanged<AsyncCallback> onRegisterHideForOverlay;
 
-  /// 在 [ElAnimatedOverlayService.showOverlay] 中再次 [forward] 的动画注册。
   @protected
   final ValueChanged<AsyncCallback> onRegisterShowForOverlay;
 }
 
-/// 约定 overlay 只使用一个 controller，子类通过重写时长和基于 controller 派生动画。
 abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> extends State<T>
     with SingleTickerProviderStateMixin {
   bool _closing = false;
+  /// 是否至少完成过首次 [show]（[controller] 到可见），用于与「首帧 [dismissed]」区分。
+  bool _seenVisibleAfterInsert = false;
   late final Future<void> _showFuture = show();
   @protected
   late final AnimationController controller = AnimationController(
@@ -249,7 +295,6 @@ abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> e
   @protected
   Duration get reverseDuration => duration;
 
-  /// 主动关闭当前 overlay：隐藏动画后调用服务层 [removeOverlay]。
   @protected
   Future<void> close() async {
     if (_closing) return;
@@ -267,7 +312,21 @@ abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> e
   @protected
   void onShown() {}
 
-  /// 在真正移除前：先等进入动画，再 [hide]（与 [ElAnimatedOverlayService.removeOverlay] 配合同路径）。
+  /// 包裹在 [Positioned.fill] 的 **child** 上（[Positioned] 须为 [Overlay] 里 [Stack] 的直接子，不可包在本方法外侧）。
+  /// [handle.hide] 仅播隐藏、不移除 [OverlayEntry] 时，[AnimationStatus.dismissed] 后让指针穿透到下层。
+  @protected
+  Widget overlayPointerFilter(Widget child) {
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        return IgnorePointer(
+          ignoring: _seenVisibleAfterInsert && controller.status == AnimationStatus.dismissed,
+          child: child,
+        );
+      },
+    );
+  }
+
   Future<void> _removeAnimationBeforeServiceRemove() async {
     if (_closing) return;
     _closing = true;
@@ -275,13 +334,11 @@ abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> e
     await hide();
   }
 
-  /// 仅隐藏：不置 [_closing] 为「进入移除流」，不调用 [removeOverlay]。
   Future<void> _hideForOverlayServiceOnly() async {
     await _showFuture;
     await hide();
   }
 
-  /// [showOverlay] 再次显示时恢复动画；若子类有额外逻辑可重写 [onShowForOverlay]。
   Future<void> _showForOverlayServiceOnly() async {
     _closing = false;
     await onShowForOverlay();
@@ -297,7 +354,9 @@ abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> e
     widget.onRegisterHideForOverlay(_hideForOverlayServiceOnly);
     widget.onRegisterShowForOverlay(_showForOverlayServiceOnly);
     _showFuture.then((_) {
-      if (mounted && !_closing) onShown();
+      if (!mounted) return;
+      _seenVisibleAfterInsert = true;
+      if (!_closing) onShown();
     });
   }
 

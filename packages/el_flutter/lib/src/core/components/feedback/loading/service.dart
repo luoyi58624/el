@@ -77,32 +77,34 @@ class _ElLoadingWidgetState extends ElAnimatedOverlayWidgetState<_ElLoadingWidge
 
   @override
   Widget build(BuildContext context) => Positioned.fill(
-    child: PopScope(
-      // loading 存在期间禁止物理返回，避免用户误退页面。
-      canPop: false,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _handleTap,
-        child: AnimatedBuilder(
-          animation: controller,
-          builder: (context, child) => ColoredBox(
-            // 遮罩颜色与中间内容共用同一个 controller 过渡。
-            color: Color.lerp(Colors.transparent, Colors.black.withAlpha(90), controller.value)!,
-            child: child!,
-          ),
-          child: Center(
-            child: FadeTransition(
-              opacity: controller,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 36),
-                decoration: BoxDecoration(color: Colors.black.withAlpha(200), borderRadius: BorderRadius.circular(12)),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const CircularProgressIndicator(),
-                    const SizedBox(height: 16),
-                    Text(widget.text, style: const TextStyle(color: Colors.white)),
-                  ],
+    child: overlayPointerFilter(
+      PopScope(
+        // loading 存在期间禁止物理返回，避免用户误退页面。
+        canPop: false,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _handleTap,
+          child: AnimatedBuilder(
+            animation: controller,
+            builder: (context, child) => ColoredBox(
+              // 遮罩颜色与中间内容共用同一个 controller 过渡。
+              color: Color.lerp(Colors.transparent, Colors.black.withAlpha(90), controller.value)!,
+              child: child!,
+            ),
+            child: Center(
+              child: FadeTransition(
+                opacity: controller,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 36),
+                  decoration: BoxDecoration(color: Colors.black.withAlpha(200), borderRadius: BorderRadius.circular(12)),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: 16),
+                      Text(widget.text, style: const TextStyle(color: Colors.white)),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -71,7 +71,7 @@ class ElMessageService extends ElAnimatedOverlayService with ChangeNotifier {
     _messageList.add(model);
     notifyListeners();
 
-    model._overlayId = insertOverlay(
+    model._handle = insertOverlay(
       (_, remove, r, h, s) => _MessageWidget(
         message: model,
         service: this,
@@ -217,20 +217,20 @@ class ElMessageService extends ElAnimatedOverlayService with ChangeNotifier {
 
   Future<void> _closeMessage(_MessageModel message) async {
     if (message._closing) return;
-    final overlayId = message._overlayId;
-    if (overlayId == null) return;
+    final handle = message._handle;
+    if (handle == null) return;
     message._closing = true;
     notifyListeners();
-    await removeOverlay(overlayId);
+    await removeOverlay(handle);
   }
 
   @override
-  void onRemoved(int id) {
-    final index = _messageList.indexWhere((message) => message._overlayId == id);
+  void onRemoved(ElOverlayHandle handle) {
+    final index = _messageList.indexWhere((message) => identical(message._handle, handle));
     if (index == -1) return;
 
     final message = _messageList.removeAt(index);
-    message._overlayId = null;
+    message._handle = null;
     message._groupCount.dispose();
     message._messageSize.dispose();
 
@@ -266,7 +266,7 @@ class _MessageModel {
   final WidgetBuilder builder;
   final Future<void> Function() close;
 
-  int? _overlayId;
+  ElOverlayHandle? _handle;
   bool _closing = false;
 
   /// 如果开启了合并消息，出现 (相同内容 & 相同类型) 的消息该值会自增

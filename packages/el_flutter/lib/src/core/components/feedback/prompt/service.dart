@@ -87,12 +87,13 @@ class ElPromptService extends ElSingleAnimatedOverlayService {
   Future<T> _showPrompt<T>({
     required T dismissResult,
     required ElAnimatedOverlayWidget Function(
-      int overlayId,
+      ElOverlayHandle handle,
       AsyncCallback remove,
       void Function(AsyncCallback) onRegisterRemoveHide,
       void Function(AsyncCallback) onRegisterHideForOverlay,
       void Function(AsyncCallback) onRegisterShowForOverlay,
-    ) builder,
+    )
+    builder,
     int? zIndex,
   }) async {
     late final Completer<Object?> completer;
@@ -132,18 +133,18 @@ class ElPromptService extends ElSingleAnimatedOverlayService {
   }
 
   Future<void> _close({required Object? result}) async {
-    final id = currentId;
+    final h = currentHandle;
     final completer = _currentCompleter;
-    if (id == null) return;
+    if (h == null) return;
     if (completer?.isCompleted == false) completer?.complete(result);
-    await removeOverlay(id);
+    await removeOverlay(h);
     if (identical(_currentCompleter, completer)) _currentCompleter = null;
     _dismissResult = null;
   }
 
   @override
-  void onRemoved(int id) {
-    super.onRemoved(id);
+  void onRemoved(ElOverlayHandle handle) {
+    super.onRemoved(handle);
     if (_currentCompleter?.isCompleted == false) _currentCompleter?.complete(_dismissResult);
     _currentCompleter = null;
     _dismissResult = null;
@@ -191,126 +192,128 @@ class _ElPromptWidgetState extends ElAnimatedOverlayWidgetState<_ElPromptWidget>
 
   @override
   Widget build(BuildContext context) => Positioned.fill(
-    child: GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: widget.onCancel == null ? null : _handleCancel,
-      child: AnimatedBuilder(
-        animation: controller,
-        builder: (context, child) => ColoredBox(
-          color: Color.lerp(Colors.transparent, Colors.black.withAlpha(90), controller.value)!,
-          child: child!,
-        ),
-        child: Center(
-          child: AnimatedBuilder(
-            animation: controller,
-            builder: (context, child) {
-              final progress = (controller.value / .8).clamp(0.0, 1.0);
-              // 只在显示阶段做轻微缩放，隐藏阶段保持原尺寸直接淡出。
-              final scale = controller.status == AnimationStatus.reverse
-                  ? 1.0
-                  : Tween(begin: 1.1, end: 1.0).transform(Curves.easeIn.transform(progress));
-              return FadeTransition(
-                opacity: controller,
-                child: Transform.scale(scale: scale, child: child),
-              );
-            },
-            child: GestureDetector(
-              onTap: () {},
-              child: Builder(
-                builder: (context) {
-                  // 面板颜色、分隔线和文案颜色都按明暗主题做一层适配。
-                  final isDark = Theme.of(context).brightness == Brightness.dark;
-                  final background = isDark ? const Color(0xCC2C2C2E) : const Color(0xCCF2F2F7);
-                  final titleColor = isDark ? Colors.white : const Color(0xFF111111);
-                  final contentColor = isDark ? Colors.white.withAlpha(220) : const Color(0xFF3C3C43).withAlpha(215);
-                  final cancelColor = isDark ? Colors.white.withAlpha(235) : const Color(0xFF111111);
-                  final dividerColor = isDark ? Colors.white.withAlpha(28) : const Color(0xFF3C3C43).withAlpha(36);
-                  final confirmColor = const Color(0xFF007AFF);
-                  return ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: BackdropFilter(
-                      // 用毛玻璃模拟 iOS alert 的磨砂质感。
-                      filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
-                      child: Container(
-                        width: 270,
-                        decoration: BoxDecoration(
-                          color: background,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withAlpha(isDark ? 20 : 120)),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  if (widget.title != null) ...[
-                                    Text(
-                                      widget.title!,
-                                      textAlign: .center,
-                                      style: TextStyle(color: titleColor, fontSize: 18, fontWeight: .bold),
+    child: overlayPointerFilter(
+      GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: widget.onCancel == null ? null : _handleCancel,
+        child: AnimatedBuilder(
+          animation: controller,
+          builder: (context, child) => ColoredBox(
+            color: Color.lerp(Colors.transparent, Colors.black.withAlpha(90), controller.value)!,
+            child: child!,
+          ),
+          child: Center(
+            child: AnimatedBuilder(
+              animation: controller,
+              builder: (context, child) {
+                final progress = (controller.value / .8).clamp(0.0, 1.0);
+                // 只在显示阶段做轻微缩放，隐藏阶段保持原尺寸直接淡出。
+                final scale = controller.status == AnimationStatus.reverse
+                    ? 1.0
+                    : Tween(begin: 1.1, end: 1.0).transform(Curves.easeIn.transform(progress));
+                return FadeTransition(
+                  opacity: controller,
+                  child: Transform.scale(scale: scale, child: child),
+                );
+              },
+              child: GestureDetector(
+                onTap: () {},
+                child: Builder(
+                  builder: (context) {
+                    // 面板颜色、分隔线和文案颜色都按明暗主题做一层适配。
+                    final isDark = Theme.of(context).brightness == Brightness.dark;
+                    final background = isDark ? const Color(0xCC2C2C2E) : const Color(0xCCF2F2F7);
+                    final titleColor = isDark ? Colors.white : const Color(0xFF111111);
+                    final contentColor = isDark ? Colors.white.withAlpha(220) : const Color(0xFF3C3C43).withAlpha(215);
+                    final cancelColor = isDark ? Colors.white.withAlpha(235) : const Color(0xFF111111);
+                    final dividerColor = isDark ? Colors.white.withAlpha(28) : const Color(0xFF3C3C43).withAlpha(36);
+                    final confirmColor = const Color(0xFF007AFF);
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(14),
+                      child: BackdropFilter(
+                        // 用毛玻璃模拟 iOS alert 的磨砂质感。
+                        filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+                        child: Container(
+                          width: 270,
+                          decoration: BoxDecoration(
+                            color: background,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: Colors.white.withAlpha(isDark ? 20 : 120)),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    if (widget.title != null) ...[
+                                      Text(
+                                        widget.title!,
+                                        textAlign: .center,
+                                        style: TextStyle(color: titleColor, fontSize: 18, fontWeight: .bold),
+                                      ),
+                                      const SizedBox(height: 8),
+                                    ],
+                                    DefaultTextStyle(
+                                      style: TextStyle(
+                                        color: contentColor,
+                                        fontSize: 14,
+                                        height: 1.35,
+                                        fontWeight: .w500,
+                                      ),
+                                      child: widget.content,
                                     ),
-                                    const SizedBox(height: 8),
                                   ],
-                                  DefaultTextStyle(
-                                    style: TextStyle(
-                                      color: contentColor,
-                                      fontSize: 14,
-                                      height: 1.35,
-                                      fontWeight: .w500,
-                                    ),
-                                    child: widget.content,
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                            Divider(height: 1, thickness: 1, color: dividerColor),
-                            SizedBox(
-                              height: 44,
-                              child: Row(
-                                children: [
-                                  if (widget.cancel != null) ...[
+                              Divider(height: 1, thickness: 1, color: dividerColor),
+                              SizedBox(
+                                height: 44,
+                                child: Row(
+                                  children: [
+                                    if (widget.cancel != null) ...[
+                                      Expanded(
+                                        child: GestureDetector(
+                                          behavior: HitTestBehavior.opaque,
+                                          onTap: _handleCancel,
+                                          child: Center(
+                                            child: _ElPromptActionLabel(
+                                              text: widget.cancel!,
+                                              color: cancelColor,
+                                              loading: _cancelLoading,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      VerticalDivider(width: 1, thickness: 1, color: dividerColor),
+                                    ],
                                     Expanded(
                                       child: GestureDetector(
                                         behavior: HitTestBehavior.opaque,
-                                        onTap: _handleCancel,
+                                        onTap: _handleConfirm,
                                         child: Center(
                                           child: _ElPromptActionLabel(
-                                            text: widget.cancel!,
-                                            color: cancelColor,
-                                            loading: _cancelLoading,
+                                            text: widget.confirm,
+                                            color: confirmColor,
+                                            loading: _confirmLoading,
+                                            bold: true,
                                           ),
                                         ),
                                       ),
                                     ),
-                                    VerticalDivider(width: 1, thickness: 1, color: dividerColor),
                                   ],
-                                  Expanded(
-                                    child: GestureDetector(
-                                      behavior: HitTestBehavior.opaque,
-                                      onTap: _handleConfirm,
-                                      child: Center(
-                                        child: _ElPromptActionLabel(
-                                          text: widget.confirm,
-                                          color: confirmColor,
-                                          loading: _confirmLoading,
-                                          bold: true,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ),

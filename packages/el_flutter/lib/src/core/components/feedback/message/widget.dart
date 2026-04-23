@@ -95,51 +95,53 @@ class _MessageWidgetState extends ElAnimatedOverlayWidgetState<_MessageWidget> {
     });
 
     return Positioned.fill(
-      child: Material(
-        type: MaterialType.transparency,
-        child: AnimatedBuilder(
-          animation: Listenable.merge([widget.service, widget.message._groupCount]),
-          builder: (context, child) {
-            return Stack(
-              children: [
-                AnimatedPositioned(
-                  duration: widget.message.animationDuration,
-                  top: MediaQuery.paddingOf(context).top + topOffset,
-                  left: 0,
-                  right: 0,
-                  child: ElRebuildWidget(
-                    child: UnconstrainedBox(
-                      child: SelectionArea(
-                        child: AnimatedBuilder(
-                          animation: controller,
-                          builder: (context, child) {
-                            return Transform.translate(
-                              offset: Offset(0, offsetAnimation.value),
-                              child: Opacity(opacity: opacityAnimation.value, child: child),
-                            );
-                          },
-                          child: ElEvent(
-                            style: ElEventStyle(
-                              onEnter: (e) {
-                                if (_removeTimer != null) {
-                                  _removeTimer!.cancel();
-                                  _removeTimer = null;
-                                }
-                              },
-                              onExit: (e) {
-                                setRemoveTimer();
-                              },
-                            ),
-                            child: Builder(
-                              builder: (context) => SizedBox(
-                                key: messageKey,
-                                child: ObsBuilder(
-                                  builder: (context) {
-                                    return ElBadge(
-                                      badge: widget.message._groupCount.value,
-                                      child: widget.message.builder(context),
-                                    );
-                                  },
+      child: overlayPointerFilter(
+        Material(
+          type: MaterialType.transparency,
+          child: AnimatedBuilder(
+            animation: Listenable.merge([widget.service, widget.message._groupCount]),
+            builder: (context, child) {
+              return Stack(
+                children: [
+                  AnimatedPositioned(
+                    duration: widget.message.animationDuration,
+                    top: MediaQuery.paddingOf(context).top + topOffset,
+                    left: 0,
+                    right: 0,
+                    child: ElRebuildWidget(
+                      child: UnconstrainedBox(
+                        child: SelectionArea(
+                          child: AnimatedBuilder(
+                            animation: controller,
+                            builder: (context, child) {
+                              return Transform.translate(
+                                offset: Offset(0, offsetAnimation.value),
+                                child: Opacity(opacity: opacityAnimation.value, child: child),
+                              );
+                            },
+                            child: ElEvent(
+                              style: ElEventStyle(
+                                onEnter: (e) {
+                                  if (_removeTimer != null) {
+                                    _removeTimer!.cancel();
+                                    _removeTimer = null;
+                                  }
+                                },
+                                onExit: (e) {
+                                  setRemoveTimer();
+                                },
+                              ),
+                              child: Builder(
+                                builder: (context) => SizedBox(
+                                  key: messageKey,
+                                  child: ObsBuilder(
+                                    builder: (context) {
+                                      return ElBadge(
+                                        badge: widget.message._groupCount.value,
+                                        child: widget.message.builder(context),
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
@@ -148,10 +150,10 @@ class _MessageWidgetState extends ElAnimatedOverlayWidgetState<_MessageWidget> {
                       ),
                     ),
                   ),
-                ),
-              ],
-            );
-          },
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
