@@ -1,7 +1,11 @@
 part of 'index.dart';
 
 class ElFormController extends ElHookState {
-  ElFormController({required this.initialValue, this.rules, this.errorTextStyle}) {
+  ElFormController({
+    required this.initialValue,
+    this.rules,
+    this.errorTextStyle = const TextStyle(fontSize: 12, color: Colors.red),
+  }) {
     formData = MapObs<String, dynamic>(initialValue);
   }
 

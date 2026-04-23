@@ -1,6 +1,7 @@
 import 'package:el_flutter/el_flutter.dart' hide ElModelValue;
 import 'package:el_flutter/ext.dart';
 import 'package:el_model_value/el_model_value.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
@@ -39,13 +40,20 @@ class ElForm extends HookWidget {
   }
 
   static ElFormController? maybeOf(BuildContext context) {
-    return context.read<ElFormController?>();
+    try {
+      return context.read<ElFormController>();
+    } on ProviderNotFoundException {
+      return null;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final formState = useHookState(() => controller);
 
-    return Provider.value(value: formState, child: child);
+    return ChangeNotifierProvider<ElFormController>.value(
+      value: formState,
+      child: child,
+    );
   }
 }
