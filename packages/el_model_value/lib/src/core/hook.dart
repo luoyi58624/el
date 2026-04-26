@@ -1,7 +1,6 @@
 part of 'index.dart';
 
 Obs<D> _useModelValue<D>(D? value, ValueNotifier<D>? modelValue, ValueChanged<D>? onChanged) {
-  assert(modelValue != null || value != null, 'ElModelValue Error: if modelValue is null, The value cannot be null.');
   return use(_ModelValueHook<D>(value: value, modelValue: modelValue, onChanged: onChanged));
 }
 
@@ -39,6 +38,7 @@ class _ModelValueHookState<D> extends HookState<Obs<D>, _ModelValueHook<D>> {
 
   /// 给外部响应式变量添加监听，将更新同步到内部的 [_obs] 变量
   void _linkRawObs() {
+    // 内部错误
     assert(hook.modelValue != null, 'ElModelValue Error: _linkRawObs has Exception.');
     _obs.rawValue = hook.modelValue!.value;
     _obs.notify();
