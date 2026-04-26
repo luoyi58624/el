@@ -1,6 +1,6 @@
 import 'package:el_flutter/ext.dart';
 import 'package:el_model_value/el_model_value.dart';
-import 'package:el_ui/el_ui.dart' hide ElModelValue, ElModelValueMixin, ElStatelessModelValue;
+import 'package:el_ui/el_ui.dart' hide ElModelValue, ElModelValueMixin;
 import 'dart:ui' show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:flutter/gestures.dart';
@@ -181,7 +181,7 @@ class ElInput extends ElInputModelValue<String> {
 
   @override
   Widget build(BuildContext context) {
-    m[_obscureOverrideKey] = useState<bool?>(null);
+    $hooks[_obscureOverrideKey] = useState<bool?>(null);
     return super.build(context);
   }
 
@@ -192,7 +192,7 @@ class ElInput extends ElInputModelValue<String> {
   }
 
   Widget buildInput(BuildContext context) {
-    final obscureOverride = m[_obscureOverrideKey] as ValueNotifier<bool?>;
+    final obscureOverride = $hooks[_obscureOverrideKey] as ValueNotifier<bool?>;
     final effectiveObscure = obscureOverride.value ?? obscureText;
 
     InputDecoration? effectiveDecoration = decoration;

@@ -15,11 +15,7 @@ class ElToastService extends ElSingleAnimatedOverlayService {
   @override
   int get zIndex => el.config.toastIndex;
 
-  Future<void> _showWidget(
-    Widget child, {
-    bool? tapClose,
-    int? zIndex,
-  }) {
+  Future<void> _showWidget(Widget child, {bool? tapClose, int? zIndex}) {
     return tasks.run(() async {
       await replace(
         (handle) => _ElToastWidget(
@@ -36,11 +32,7 @@ class ElToastService extends ElSingleAnimatedOverlayService {
   /// 默认 toast 显示在中间；
   /// 当 type 不为 null 时，使用旧版主题 toast 的底部样式。
   Future<void> show(dynamic content, {ElThemeType? type, bool? tapClose, int? zIndex}) {
-    return _showWidget(
-      type == null ? _Toast(content) : _ThemeToast(content, type),
-      tapClose: tapClose,
-      zIndex: zIndex,
-    );
+    return _showWidget(type == null ? _Toast(content) : _ThemeToast(content, type), tapClose: tapClose, zIndex: zIndex);
   }
 
   Future<void> primary(dynamic content, {bool? tapClose, int? zIndex}) =>
@@ -76,13 +68,17 @@ class _ElToastWidget extends ElAnimatedOverlayWidget {
 }
 
 class _ElToastWidgetState extends ElAnimatedOverlayWidgetState<_ElToastWidget> {
+  late final animate = CurvedAnimation(
+    parent: controller,
+    curve: Curves.easeOut,
+  );
   Timer? _timer;
 
   @override
-  Duration get duration => 150.ms;
+  Duration get duration => 300.ms;
 
   @override
-  Duration get reverseDuration => 50.ms;
+  Duration get reverseDuration => 200.ms;
 
   @override
   Future<void> hide() async {
@@ -97,6 +93,7 @@ class _ElToastWidgetState extends ElAnimatedOverlayWidgetState<_ElToastWidget> {
 
   @override
   void dispose() {
+    animate.dispose();
     _timer?.cancel();
     super.dispose();
   }
@@ -105,7 +102,7 @@ class _ElToastWidgetState extends ElAnimatedOverlayWidgetState<_ElToastWidget> {
   Widget build(BuildContext context) => Positioned.fill(
     child: overlayPointerFilter(
       FadeTransition(
-        opacity: controller,
+        opacity: animate,
         child: IgnorePointer(
           // 默认不接管手势，保证不影响页面下方操作。
           ignoring: widget.tapClose != true,

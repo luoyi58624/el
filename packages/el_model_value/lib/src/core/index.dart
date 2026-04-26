@@ -1,4 +1,4 @@
-import 'package:el_flutter/el_flutter.dart' show safeCallback;
+import 'package:el_flutter/el_flutter.dart' show safeCallback, ElLog;
 import 'package:el_flutter/ext.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +13,7 @@ part 'hook.dart';
 //   multi,
 // }
 
-abstract class ElModelValue<D> extends HookWidget with ElStatelessModelMixin {
+abstract class ElModelValue<D> extends HookWidget with ElHookWidgetModelMixin {
   ElModelValue({super.key, this.value, this.modelValue, this.onChanged});
 
   final D? value;
@@ -22,13 +22,12 @@ abstract class ElModelValue<D> extends HookWidget with ElStatelessModelMixin {
 
   /// 访问 obs 响应式变量
   @protected
-  Obs<D> get $obs => m['obs'] as Obs<D>;
+  Obs<D> get $obs => $hooks['obs'] as Obs<D>;
 
   @override
   Widget build(BuildContext context) {
-    // 创建双向绑定钩子，根据 value、modelValue 返回全新的 Obs 响应式变量
-    m['obs'] = _useModelValue<D>(value, modelValue, onChanged);
-    return ListenableBuilder(listenable: m['obs'], builder: (context, child) => obsBuild(context));
+    final obs = addHook('obs', _useModelValue<D>(value, modelValue, onChanged));
+    return ListenableBuilder(listenable: obs, builder: (context, child) => obsBuild(context));
   }
 
   /// 构建响应式组件
@@ -36,8 +35,15 @@ abstract class ElModelValue<D> extends HookWidget with ElStatelessModelMixin {
   Widget obsBuild(BuildContext context);
 }
 
-mixin ElStatelessModelMixin on StatelessWidget {
-  /// 声明一个 Map，方便 [StatelessWidget] 无状态组件的数据访问，避免每个方法进行不断传参
+mixin ElHookWidgetModelMixin on HookWidget {
+  /// 保留 hooks 的引用，避免在多个方法中进行不断传参
   @protected
-  final Map<String, dynamic> m = {};
+  final Map<String, dynamic> $hooks = {};
+
+  /// 将 hook 添加到 Map 集合中，如果已存在相同的 key，则返回已有 hook 结果
+  @protected
+  T addHook<T>(String key, T value) {
+    if ($hooks.containsKey(key)) return $hooks[key] as T;
+    return $hooks[key] = value;
+  }
 }

@@ -1,5 +1,5 @@
 import 'package:el_model_value/el_model_value.dart';
-import 'package:el_ui/el_ui.dart' hide ElModelValue, ElModelValueMixin, ElStatelessModelValue;
+import 'package:el_ui/el_ui.dart' hide ElModelValue, ElModelValueMixin;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

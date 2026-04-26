@@ -10,6 +10,16 @@ typedef ElAnimatedOverlayBuilder = Widget Function(ElOverlayHandle handle);
 /// 与单次 [createOverlayHandle] / [insertOverlay] 一一对应。
 /// 通过 [remove] / [hide] / [show] 操作该层，无需暴露整型 id。
 class ElOverlayHandle extends ChangeNotifier {
+  static ElOverlayHandle of(BuildContext context) {
+    final handle = maybeOf(context);
+    assert(handle != null, 'ElOverlayHandle.of: no overlay handle in this context');
+    return handle!;
+  }
+
+  static ElOverlayHandle? maybeOf(BuildContext context) {
+    return _ElOverlayScope.maybeOf(context);
+  }
+
   ElOverlayHandle._(this._owner);
 
   final ElAnimatedOverlayService _owner;
@@ -34,16 +44,6 @@ class ElOverlayHandle extends ChangeNotifier {
   void _deactivate() {
     _isActive = false;
     notifyListeners();
-  }
-
-  static ElOverlayHandle of(BuildContext context) {
-    final handle = maybeOf(context);
-    assert(handle != null, 'ElOverlayHandle.of: no overlay handle in this context');
-    return handle!;
-  }
-
-  static ElOverlayHandle? maybeOf(BuildContext context) {
-    return _ElOverlayScope.maybeOf(context);
   }
 
   Future<void> remove() {
@@ -328,10 +328,7 @@ abstract class ElAnimatedOverlayWidgetState<T extends ElAnimatedOverlayWidget> e
     return ListenableBuilder(
       listenable: Listenable.merge([controller, handle]),
       builder: (context, _) {
-        return IgnorePointer(
-          ignoring: !handle.isVisible,
-          child: child,
-        );
+        return IgnorePointer(ignoring: !handle.isVisible, child: child);
       },
     );
   }

@@ -33,23 +33,22 @@ abstract class ElInputModelValue<D> extends ElFormModelValue<D> {
   D toModelValue(String text) => text as D;
 
   @protected
-  TextEditingController get $textEditingController => m['textEditingController'] as TextEditingController;
+  TextEditingController get $textEditingController => $hooks['textEditingController'] as TextEditingController;
 
   @protected
-  FocusNode get $focusNode => m['focusNode'] as FocusNode;
+  FocusNode get $focusNode => $hooks['focusNode'] as FocusNode;
 
   @protected
-  ScrollController get $scrollController => m['scrollController'] as ScrollController;
+  ScrollController get $scrollController => $hooks['scrollController'] as ScrollController;
 
   @override
   Widget build(BuildContext context) {
     Widget result = super.build(context);
 
     final text = toTextEditing($obs.value);
-    m['textEditingController'] = useTextEditingController(text: text);
-    m['focusNode'] = useFocusNode();
-    m['scrollController'] = useScrollController();
-
+    addHook('textEditingController', useTextEditingController(text: text));
+    addHook('focusNode', useFocusNode());
+    addHook('scrollController', useScrollController());
     return result;
   }
 
