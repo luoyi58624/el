@@ -61,7 +61,7 @@ class _ElSegmentedButtonState<T> extends State<ElSegmentedButton<T>> with ElMode
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     return SegmentedButton(
       segments: widget.children
           .mapIndexed((i, e) => ButtonSegment(value: e.value ?? e.label, label: Text('${e.label}')))

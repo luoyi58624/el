@@ -156,12 +156,12 @@ mixin ElModelValueMixin<T extends ElModelValue<D>, D> on State<T> {
 
   /// 构建响应式小部件，当响应式变量发生更新时，会自动重建此方法
   @protected
-  Widget obsBuilder(BuildContext context);
+  Widget obsBuild(BuildContext context);
 
-  /// 监听 [obs] 变量更新，重建 [obsBuilder] 代码块
+  /// 监听 [obs] 变量更新，重建 [obsBuild] 代码块
   @override
   @protected
   Widget build(BuildContext context) {
-    return ListenableBuilder(listenable: obs, builder: (context, child) => obsBuilder(context));
+    return ListenableBuilder(listenable: obs, builder: (context, child) => obsBuild(context));
   }
 }

@@ -230,7 +230,7 @@ class ElCheckboxToggle extends ElModelValue<bool?> {
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     return _Checkbox(
       color: color,
       checkColor: checkColor,

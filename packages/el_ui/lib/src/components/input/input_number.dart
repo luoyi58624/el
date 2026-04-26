@@ -1,6 +1,6 @@
 part of 'index.dart';
 
-class ElInputNumber extends ElInputModelValue<num?> {
+class ElInputNumber extends ElInputNumModelValue {
   ElInputNumber({
     super.key,
     super.value,
@@ -37,31 +37,10 @@ class ElInputNumber extends ElInputModelValue<num?> {
   final bool required;
 
   @override
-  String toTextEditing(num? value) {
-    if (value == null) return '';
-    return value.toString();
-  }
-
-  @override
-  num? toModelValue(String text) {
-    if (text == '') return null;
-    return num.parse(text);
-  }
-
-  @override
-  Widget obsBuilder(BuildContext context) {
-    final text = toTextEditing($obs.value);
-    final tc = controller ?? $textController;
-    if (text != tc.text) {
-      tc.value = TextEditingValue(text: text);
-    }
-    return buildInput(context);
-  }
-
-  @override
-  Widget buildInput(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
+    super.obsBuild(context);
     return TextField(
-      controller: controller ?? $textController,
+      controller: controller ?? $textEditingController,
       onChanged: (s) => $obs.value = toModelValue(s),
       focusNode: focusNode ?? $focusNode,
       scrollController: scrollController ?? $scrollController,

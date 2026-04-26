@@ -29,7 +29,7 @@ class ElCheckboxGroup extends ElFormModelValue<List<Object?>> {
       context.dependOnInheritedWidgetOfExactType<_ElCheckboxGroupInheritedWidget>()?.scope;
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     return _ElCheckboxGroupInheritedWidget(
       scope: ElCheckboxGroupScope(this, $obs),
       child: child,

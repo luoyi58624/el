@@ -273,7 +273,7 @@ class ElPopupState<T extends ElPopup> extends State<T>
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     throw UnimplementedError();
   }
 }

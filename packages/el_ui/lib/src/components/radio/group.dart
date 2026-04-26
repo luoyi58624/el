@@ -32,7 +32,7 @@ class ElRadioGroup extends ElFormModelValue<Object?> {
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     final scope = ElRadioGroupScope(this, $obs);
     return _ElRadioGroupInheritedWidget(
       scope: scope,

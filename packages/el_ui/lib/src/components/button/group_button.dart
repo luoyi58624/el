@@ -241,7 +241,7 @@ class _ElButtonGroupState extends _ElButtonState<ElButtonGroup> with ElModelValu
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     return _ElButtonGroupInheritedWidget(
       this,
       child: Stack(

@@ -68,11 +68,7 @@ void main() {
               builder: (context, setState) {
                 return Column(
                   children: [
-                    _TestStringInput(
-                      key: const Key('in3'),
-                      value: value,
-                      onChanged: (v) => setState(() => value = v),
-                    ),
+                    _TestStringInput(key: const Key('in3'), value: value, onChanged: (v) => setState(() => value = v)),
                     Text(value, key: const Key('echo')),
                   ],
                 );
@@ -91,11 +87,7 @@ void main() {
 
   group('与 HookWidget / useState 组合', () {
     testWidgets('同一路 useState 下 modelValue 与 value+onChanged 两路输入与底部 Text 一致', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: _HookStringInputPage(),
-        ),
-      );
+      await tester.pumpWidget(const MaterialApp(home: _HookStringInputPage()));
 
       final fields = find.byType(TextField);
       expect(fields, findsNWidgets(2));
@@ -105,10 +97,7 @@ void main() {
       await tester.enterText(fields.at(1), 'm2');
       await tester.pumpAndSettle();
 
-      expect(
-        tester.widget<Text>(find.byKey(const Key('username_display'))).data,
-        'm2',
-      );
+      expect(tester.widget<Text>(find.byKey(const Key('username_display'))).data, 'm2');
     });
   });
 }
@@ -117,9 +106,14 @@ class _TestStringInput extends ElInputModelValue<String> {
   _TestStringInput({super.key, super.value = '', super.modelValue, super.onChanged});
 
   @override
+  Widget obsBuild(BuildContext context) {
+    super.obsBuild(context);
+    return buildInput(context);
+  }
+
   Widget buildInput(BuildContext context) {
     return TextField(
-      controller: $textController,
+      controller: $textEditingController,
       onChanged: (v) {
         $obs.value = v;
       },

@@ -6,6 +6,7 @@ abstract class ElInputNumModelValue extends ElInputModelValue<num?> {
     super.value,
     super.modelValue,
     super.onChanged,
+    super.prop,
     super.controller,
     super.focusNode,
     super.scrollController,
@@ -13,8 +14,8 @@ abstract class ElInputNumModelValue extends ElInputModelValue<num?> {
 
   @override
   String toTextEditing(num? value) {
-    if (modelValue == null) return '';
-    return modelValue.toString();
+    if (value == null) return '';
+    return value.toString();
   }
 
   @override

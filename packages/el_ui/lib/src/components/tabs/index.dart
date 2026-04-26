@@ -156,7 +156,7 @@ class ElTabsState extends State<ElTabs> with ElModelValueMixin<ElTabs, dynamic> 
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     return Container(
       width: axis == Axis.vertical ? themeData.height : null,
       height: axis == Axis.horizontal ? themeData.height : null,

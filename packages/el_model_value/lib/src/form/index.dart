@@ -2,7 +2,6 @@ import 'package:el_flutter/el_flutter.dart' hide ElModelValue;
 import 'package:el_flutter/ext.dart';
 import 'package:el_model_value/el_model_value.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
 part 'state.dart';
@@ -51,9 +50,6 @@ class ElForm extends HookWidget {
   Widget build(BuildContext context) {
     final formState = useHookState(() => controller);
 
-    return ChangeNotifierProvider<ElFormController>.value(
-      value: formState,
-      child: child,
-    );
+    return ChangeNotifierProvider<ElFormController>.value(value: formState, child: child);
   }
 }

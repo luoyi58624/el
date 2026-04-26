@@ -105,18 +105,13 @@ class ElSelect<T> extends ElInputModelValue<T> {
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
-    final text = toTextEditing($obs.value);
-    final tc = controller ?? $textController;
-    if (text != tc.text) {
-      tc.value = TextEditingValue(text: text);
-    }
+  Widget obsBuild(BuildContext context) {
+    super.obsBuild(context);
     return buildInput(context);
   }
 
-  @override
   Widget buildInput(BuildContext context) {
-    final textController = controller ?? $textController;
+    final textController = controller ?? $textEditingController;
     final effectiveFocusNode = focusNode ?? $focusNode;
 
     return DropdownMenu<T>(

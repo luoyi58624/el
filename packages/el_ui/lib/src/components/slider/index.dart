@@ -44,7 +44,7 @@ class ElSlider extends ElFormModelValue<double> {
   final EdgeInsetsGeometry? padding;
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     return Slider(
       value: $obs.value.clamp(min, max),
       onChanged: (v) => $obs.value = v,

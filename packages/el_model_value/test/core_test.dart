@@ -138,7 +138,7 @@ class _TestBoolModelValue extends ElModelValue<bool> {
   _TestBoolModelValue({super.key, super.value = false, super.modelValue, super.onChanged});
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     return Switch(
       value: $obs.value,
       onChanged: (v) {

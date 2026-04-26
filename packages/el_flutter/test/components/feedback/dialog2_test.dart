@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:el_flutter/el_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -88,7 +86,6 @@ void main() {
       await _pumpDialog2(tester);
 
       expect(find.byKey(const ValueKey('el_dialog2_backdrop')), findsNothing);
-
     }, skip: true);
   });
 }

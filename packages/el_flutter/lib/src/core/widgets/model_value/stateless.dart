@@ -27,17 +27,17 @@ abstract class ElStatelessModelValue<D> extends StatelessWidget {
 
   /// 构建响应式小部件，当响应式变量发生更新时，会自动重建此方法
   @protected
-  Widget obsBuilder(BuildContext context, D value);
+  Widget obsBuild(BuildContext context, D value);
 
   @override
   Widget build(BuildContext context) {
     if (_modelValue is ValueNotifier) {
       return ValueListenableBuilder(
         valueListenable: _modelValue,
-        builder: (context, value, child) => obsBuilder(context, value),
+        builder: (context, value, child) => obsBuild(context, value),
       );
     } else {
-      return obsBuilder(context, _modelValue);
+      return obsBuild(context, _modelValue);
     }
   }
 }

@@ -76,7 +76,7 @@ class _ElCascaderMenuState extends State<ElCascaderMenu> with ElModelValueMixin 
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     return Column(crossAxisAlignment: .start, children: []);
   }
 }

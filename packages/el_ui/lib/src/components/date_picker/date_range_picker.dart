@@ -180,7 +180,7 @@ class ElDateRangePickerState extends State<ElDateRangePicker> with ElModelValueM
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     _themeData = buildThemeData(context);
     return ElEvent(
       style: ElEventStyle(onTap: (e) => showPicker()),

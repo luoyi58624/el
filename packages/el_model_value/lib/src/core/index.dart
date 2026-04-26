@@ -13,31 +13,31 @@ part 'hook.dart';
 //   multi,
 // }
 
-abstract class ElModelValue<D> extends HookWidget {
+abstract class ElModelValue<D> extends HookWidget with ElStatelessModelMixin {
   ElModelValue({super.key, this.value, this.modelValue, this.onChanged});
 
   final D? value;
   final ValueNotifier<D>? modelValue;
   final ValueChanged<D>? onChanged;
 
-  /// 保存创建的数据，避免在每个方法进行传参，它所记录的是临时数据，所以无需担心状态问题。
-  ///
-  /// 提示：双向绑定的组件基本都依赖可变值，所以基本用不上 const 修饰。
-  @protected
-  final Map<String, dynamic> $model = {};
-
   /// 访问 obs 响应式变量
   @protected
-  Obs<D> get $obs => $model['obs'] as Obs<D>;
+  Obs<D> get $obs => m['obs'] as Obs<D>;
 
   @override
   Widget build(BuildContext context) {
     // 创建双向绑定钩子，根据 value、modelValue 返回全新的 Obs 响应式变量
-    $model['obs'] = _useModelValue<D>(value, modelValue, onChanged);
-    return ListenableBuilder(listenable: $model['obs'], builder: (context, child) => obsBuilder(context));
+    m['obs'] = _useModelValue<D>(value, modelValue, onChanged);
+    return ListenableBuilder(listenable: m['obs'], builder: (context, child) => obsBuild(context));
   }
 
   /// 构建响应式组件
   @protected
-  Widget obsBuilder(BuildContext context);
+  Widget obsBuild(BuildContext context);
+}
+
+mixin ElStatelessModelMixin on StatelessWidget {
+  /// 声明一个 Map，方便 [StatelessWidget] 无状态组件的数据访问，避免每个方法进行不断传参
+  @protected
+  final Map<String, dynamic> m = {};
 }

@@ -181,23 +181,18 @@ class ElInput extends ElInputModelValue<String> {
 
   @override
   Widget build(BuildContext context) {
-    $model[_obscureOverrideKey] = useState<bool?>(null);
+    m[_obscureOverrideKey] = useState<bool?>(null);
     return super.build(context);
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
-    final text = toTextEditing($obs.value);
-    final tc = controller ?? $textController;
-    if (text != tc.text) {
-      tc.value = TextEditingValue(text: text);
-    }
+  Widget obsBuild(BuildContext context) {
+    super.obsBuild(context);
     return buildInput(context);
   }
 
-  @override
   Widget buildInput(BuildContext context) {
-    final obscureOverride = $model[_obscureOverrideKey] as ValueNotifier<bool?>;
+    final obscureOverride = m[_obscureOverrideKey] as ValueNotifier<bool?>;
     final effectiveObscure = obscureOverride.value ?? obscureText;
 
     InputDecoration? effectiveDecoration = decoration;
@@ -246,7 +241,7 @@ class ElInput extends ElInputModelValue<String> {
       }
     }
 
-    final tc = controller ?? $textController;
+    final tc = controller ?? $textEditingController;
     final fn = focusNode ?? $focusNode;
     final sc = scrollController ?? $scrollController;
 

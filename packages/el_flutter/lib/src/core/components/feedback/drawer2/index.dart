@@ -62,7 +62,7 @@ class _ElDrawer2State extends State<ElDrawer2> with ElModelValueMixin<ElDrawer2,
   }
 
   @override
-  Widget obsBuilder(BuildContext context) {
+  Widget obsBuild(BuildContext context) {
     final overlaySize = MediaQuery.sizeOf(context);
     final direction = widget.direction.applyTextDirection(Directionality.of(context));
     double? left = 0.0;
@@ -162,7 +162,7 @@ class _ElDrawer2State extends State<ElDrawer2> with ElModelValueMixin<ElDrawer2,
       // 强制将抽屉放置顶层，可以节省很多额外的计算
       overlayLocation: OverlayChildLocation.rootOverlay,
       overlayChildBuilder: (context) {
-        return obsBuilder(context);
+        return obsBuild(context);
       },
       child: widget.child,
     );
