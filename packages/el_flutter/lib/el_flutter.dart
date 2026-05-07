@@ -72,6 +72,7 @@ export 'src/core/hooks/hook_state.dart';
 export 'src/core/hooks/simple_hooks.dart';
 export 'src/core/hooks/watch.dart';
 
+export 'src/core/mixins/hook.dart';
 export 'src/core/mixins/notify.dart';
 export 'src/core/mixins/shortcut.dart';
 

@@ -181,7 +181,7 @@ class ElInput extends ElInputModelValue<String> {
 
   @override
   Widget build(BuildContext context) {
-    $hooks[_obscureOverrideKey] = useState<bool?>(null);
+    $add(_obscureOverrideKey, useState<bool?>(null));
     return super.build(context);
   }
 
@@ -192,7 +192,7 @@ class ElInput extends ElInputModelValue<String> {
   }
 
   Widget buildInput(BuildContext context) {
-    final obscureOverride = $hooks[_obscureOverrideKey] as ValueNotifier<bool?>;
+    final obscureOverride = $get<ValueNotifier<bool?>>(_obscureOverrideKey);
     final effectiveObscure = obscureOverride.value ?? obscureText;
 
     InputDecoration? effectiveDecoration = decoration;
