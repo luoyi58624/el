@@ -1,0 +1,18 @@
+targets:
+  $default:
+    auto_apply_builders: true
+    # 配置需要生成的代码模块，注意：如果其他包需要依赖本库中的代码，
+    # 若代码不在以下目录中，那么生成器将解析不到目标对象。
+    sources:
+      - lib/**
+      - lib/$lib$
+      - $package$
+    builders:
+      element_generator|model:
+        generate_for:
+          - lib/src/core/commons/**
+          - lib/src/corecomponents/**
+          - lib/src/core/styles/**
+          - lib/src/ext/raw_widgets/**
+
+

@@ -1,0 +1,5 @@
+include: package:el_dart/lints.yaml
+
+linter:
+  rules:
+    library_names: false

@@ -1,0 +1,31 @@
+builders:
+  model:
+    import: "package:el_gen/builder.dart"
+    builder_factories: [ "elModelBuilder" ]
+    build_extensions: { ".dart": [ ".g.part" ] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: [ "source_gen:combining_builder" ]
+  themeData:
+    import: "package:el_gen/builder.dart"
+    builder_factories: [ "elThemeDataBuilder" ]
+    build_extensions: { ".dart": [ ".g.part" ] }
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: [ "source_gen:combining_builder" ]
+
+targets:
+  $default:
+    auto_apply_builders: true
+    sources:
+      - lib/**
+      - test/**
+      - $package$
+    builders:
+      source_gen:combining_builder:
+        options:
+          build_extensions:
+            '^test/models/{{}}.dart': 'test/generates/models/{{}}.g.dart'
+      el_gen|model:
+        generate_for:
+          - test/models/**
